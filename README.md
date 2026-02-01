@@ -69,7 +69,7 @@ The model is trained on a comprehensive dataset containing daily logs of women's
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/zpanchal04/Neohealth.git
+git clone https://github.com/vishaljani04/Neohealth.git
 cd Neohealth
 ```
 
