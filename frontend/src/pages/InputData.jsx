@@ -71,7 +71,7 @@ const InputData = () => {
         <div style={{ padding: '0 2rem 4rem' }}>
             <h2 className="title-gradient" style={{ marginBottom: '2rem' }}>{t('log_daily_health')}</h2>
 
-            <form onSubmit={handleSubmit} className="card" style={{ maxWidth: '850px', margin: '0 auto' }}>
+            <form onSubmit={handleSubmit} className="card" style={{ maxWidth: '1000px', margin: '0 auto' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1.2fr) 1fr', gap: '2rem' }}>
                     <div>
                         <h3 style={{ marginBottom: '1.5rem', color: 'var(--primary)' }}>{t('hormones_vitals')}</h3>

@@ -32,7 +32,7 @@ const StatCard = ({ icon, label, value, unit }) => (
 );
 
 const Dashboard = ({ onDataUpdate }) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [records, setRecords] = useState([]);
     const [predictions, setPredictions] = useState([]);
     const [datasets, setDatasets] = useState([]);
@@ -71,7 +71,7 @@ const Dashboard = ({ onDataUpdate }) => {
     );
 
     return (
-        <div style={{ padding: '0 2rem 4rem', maxWidth: '1400px', margin: '0 auto' }}>
+        <div style={{ padding: '0 0.5rem 4rem', width: '92%', maxWidth: '1800px', margin: '0 auto' }}>
             {/* Header Section */}
             <header style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
                 <div>
