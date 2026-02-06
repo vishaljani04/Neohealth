@@ -1,0 +1,13 @@
+{
+  "name": "neohealth",
+  "version": "1.0.0",
+  "description": "Root script to run both backend and frontend",
+  "scripts": {
+    "start": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "backend": "cd backend && (if exist venv\\Scripts\\activate (call venv\\Scripts\\activate) else (call ..\\venv\\Scripts\\activate)) && python run.py",
+    "frontend": "cd frontend && npm run dev"
+  },
+  "devDependencies": {
+    "concurrently": "^8.0.0"
+  }
+}

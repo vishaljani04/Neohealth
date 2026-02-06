@@ -9,6 +9,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    mobile = db.Column(db.String(20), unique=True, nullable=True)
     
     health_records = db.relationship('HealthRecord', backref='user', lazy='dynamic')
     predictions = db.relationship('Prediction', backref='user', lazy='dynamic')
@@ -48,6 +49,10 @@ class HealthRecord(db.Model):
     
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    __table_args__ = (
+        db.Index('idx_health_user_date', 'user_id', 'date'),
+    )
+
 class Prediction(db.Model):
     __tablename__ = 'predictions'
     id = db.Column(db.Integer, primary_key=True)
@@ -57,3 +62,7 @@ class Prediction(db.Model):
     predicted_phase = db.Column(db.String(64), nullable=False)
     confidence = db.Column(db.Float)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    __table_args__ = (
+        db.Index('idx_pred_user_date', 'user_id', 'date'),
+    )

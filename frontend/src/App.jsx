@@ -7,23 +7,36 @@ import Register from './pages/Register';
 import InputData from './pages/InputData';
 import { authService } from './services/api';
 
+import SplashScreen from './components/SplashScreen';
+
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      authService.me()
-        .then(res => setUser(res.data))
-        .catch(() => localStorage.removeItem('token'))
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
-    }
+    const checkAuth = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (token) {
+          const res = await authService.me();
+          setUser(res.data);
+        }
+      } catch (e) {
+        localStorage.removeItem('token');
+      } finally {
+        setLoading(false);
+      }
+    };
+    checkAuth();
   }, []);
 
-  if (loading) return <div className="loading">Loading NeoHealth...</div>;
+  if (showSplash) {
+    return <SplashScreen onFinish={() => setShowSplash(false)} />;
+  }
+
+  // Optional: keep a small loader if auth is somehow slower than splash (unlikely given 2.5s splash)
+  if (loading) return null;
 
   return (
     <Router>
@@ -31,8 +44,9 @@ function App() {
         {user && <Navbar user={user} setUser={setUser} />}
         <main className="content">
           <Routes>
-            <Route path="/login" element={!user ? <Login setUser={setUser} /> : <Navigate to="/" />} />
+            <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
             <Route path="/register" element={!user ? <Register /> : <Navigate to="/" />} />
+            {/* If user is not logged in, redirect to Login. This happens automatically after Splash via Navigate */}
             <Route path="/" element={user ? <Dashboard /> : <Navigate to="/login" />} />
             <Route path="/input" element={user ? <InputData /> : <Navigate to="/login" />} />
           </Routes>
