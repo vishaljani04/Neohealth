@@ -1,32 +1,46 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Activity, LogOut, LayoutDashboard, PlusCircle, User, Settings, Database, ChevronDown } from 'lucide-react';
+import { Activity, LogOut, LayoutDashboard, PlusCircle, User, Settings, Database, ChevronDown, Globe } from 'lucide-react';
 import ProfileModal from './ProfileModal';
 import HealthDataModal from './HealthDataModal';
+import { useTranslation } from 'react-i18next';
 
 const Navbar = ({ user, setUser, onDataUpdate }) => {
     const navigate = useNavigate();
+    const dropdownRef = useRef(null);
+    const langDropdownRef = useRef(null);
+    const { t, i18n } = useTranslation();
+
+    // UI State
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [showProfileModal, setShowProfileModal] = useState(false);
-    const [showDataModal, setShowDataModal] = useState(false);
-    const dropdownRef = useRef(null);
-
-    // Close dropdown when clicking outside
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-                setDropdownOpen(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
+    const [showHealthModal, setShowHealthModal] = useState(false);
+    const [langDropdownOpen, setLangDropdownOpen] = useState(false);
 
     const handleLogout = () => {
         localStorage.removeItem('token');
         setUser(null);
         navigate('/login');
     };
+
+    const changeLanguage = (lng) => {
+        i18n.changeLanguage(lng);
+        setLangDropdownOpen(false);
+    };
+
+    // Click outside handler
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setDropdownOpen(false);
+            }
+            if (langDropdownRef.current && !langDropdownRef.current.contains(event.target)) {
+                setLangDropdownOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     return (
         <>
@@ -47,6 +61,29 @@ const Navbar = ({ user, setUser, onDataUpdate }) => {
                     <Link to="/input" style={{ textDecoration: 'none', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 500 }}>
                         <PlusCircle size={18} /> Add Health Data
                     </Link>
+
+                    {/* Language Switcher */}
+                    <div style={{ position: 'relative' }} ref={langDropdownRef}>
+                        <button
+                            onClick={() => setLangDropdownOpen(!langDropdownOpen)}
+                            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}
+                        >
+                            <Globe size={18} />
+                            <span style={{ textTransform: 'uppercase', fontSize: '0.9rem', fontWeight: 600 }}>{i18n.language}</span>
+                            <ChevronDown size={16} color="var(--text-secondary)" />
+                        </button>
+                        {langDropdownOpen && (
+                            <div style={{
+                                position: 'absolute', top: '120%', right: 0, width: '120px',
+                                background: 'white', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                                border: '1px solid var(--border)', overflow: 'hidden', padding: '0.2rem', zIndex: 1000
+                            }}>
+                                <div onClick={() => changeLanguage('en')} className="dropdown-item" style={{ padding: '0.5rem 1rem', cursor: 'pointer', fontSize: '0.9rem' }}>English</div>
+                                <div onClick={() => changeLanguage('hi')} className="dropdown-item" style={{ padding: '0.5rem 1rem', cursor: 'pointer', fontSize: '0.9rem' }}>हिंदी (Hindi)</div>
+                                <div onClick={() => changeLanguage('gu')} className="dropdown-item" style={{ padding: '0.5rem 1rem', cursor: 'pointer', fontSize: '0.9rem' }}>ગુજરાતી (Guj)</div>
+                            </div>
+                        )}
+                    </div>
 
                     {/* User Dropdown */}
                     <div style={{ position: 'relative' }} ref={dropdownRef}>
@@ -74,32 +111,33 @@ const Navbar = ({ user, setUser, onDataUpdate }) => {
                             }}>
                                 <div style={{ padding: '0.8rem', borderBottom: '1px solid var(--border)', marginBottom: '0.5rem' }}>
                                     <p style={{ margin: 0, fontWeight: 600, fontSize: '0.9rem' }}>{user.username}</p>
-                                    <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user.email}</p>
+                                    <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{user.email}</p>
                                 </div>
 
                                 <button
                                     onClick={() => { setShowProfileModal(true); setDropdownOpen(false); }}
                                     className="dropdown-item"
-                                    style={{ width: '100%', textAlign: 'left', padding: '0.6rem 0.8rem', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.9rem', color: 'var(--text-main)', borderRadius: '6px' }}
+                                    style={{ width: '100%', padding: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'none', border: 'none', cursor: 'pointer', borderRadius: '6px', textAlign: 'left', fontSize: '0.9rem', color: 'var(--text-main)' }}
                                 >
-                                    <User size={16} /> Profile Management
+                                    <User size={16} /> {t('profile')}
                                 </button>
 
                                 <button
-                                    onClick={() => { setShowDataModal(true); setDropdownOpen(false); }}
+                                    onClick={() => { setShowHealthModal(true); setDropdownOpen(false); }}
                                     className="dropdown-item"
-                                    style={{ width: '100%', textAlign: 'left', padding: '0.6rem 0.8rem', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.9rem', color: 'var(--text-main)', borderRadius: '6px' }}
+                                    style={{ width: '100%', padding: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'none', border: 'none', cursor: 'pointer', borderRadius: '6px', textAlign: 'left', fontSize: '0.9rem', color: 'var(--text-main)' }}
                                 >
-                                    <Database size={16} /> Health Data
+                                    <Database size={16} /> {t('health_data')}
                                 </button>
 
-                                <div style={{ borderTop: '1px solid var(--border)', margin: '0.5rem 0' }}></div>
+                                <div style={{ height: '1px', background: 'var(--border)', margin: '0.5rem 0' }}></div>
 
                                 <button
                                     onClick={handleLogout}
-                                    style={{ width: '100%', textAlign: 'left', padding: '0.6rem 0.8rem', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.9rem', color: '#ef4444', borderRadius: '6px' }}
+                                    className="dropdown-item"
+                                    style={{ width: '100%', padding: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'none', border: 'none', cursor: 'pointer', borderRadius: '6px', textAlign: 'left', fontSize: '0.9rem', color: '#ef4444' }}
                                 >
-                                    <LogOut size={16} /> Logout
+                                    <LogOut size={16} /> {t('logout')}
                                 </button>
                             </div>
                         )}
@@ -111,19 +149,21 @@ const Navbar = ({ user, setUser, onDataUpdate }) => {
                 <ProfileModal
                     user={user}
                     onClose={() => setShowProfileModal(false)}
-                    onUpdate={(updatedUser) => setUser(updatedUser)}
+                    onUpdate={(updatedUser) => {
+                        setUser(updatedUser);
+                        if (onDataUpdate) onDataUpdate();
+                    }}
                 />
             )}
 
-            {showDataModal && (
+            {showHealthModal && (
                 <HealthDataModal
-                    onClose={() => setShowDataModal(false)}
+                    onClose={() => setShowHealthModal(false)}
                     onDataUpdate={onDataUpdate}
                 />
             )}
-
             <style>{`
-                .dropdown-item:hover { background-color: #f1f5f9 !important; }
+                .dropdown-item:hover { background-color: #f1f5f9; }
             `}</style>
         </>
     );

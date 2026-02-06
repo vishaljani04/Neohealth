@@ -26,6 +26,9 @@ def create_app(config_class=Config):
         app.register_blueprint(admin.bp, url_prefix='/api/admin')
         app.register_blueprint(datasets.bp, url_prefix='/api/datasets')
         
+        from .routes import chat
+        app.register_blueprint(chat.bp, url_prefix='/api/chat')
+        
         db.create_all()
 
     return app

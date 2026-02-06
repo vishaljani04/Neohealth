@@ -4,10 +4,13 @@ import { motion } from 'framer-motion';
 
 // --- Logic Layer (Heuristics) ---
 
+import { useTranslation } from 'react-i18next';
+
+// --- Logic Layer (Heuristics) ---
+
 export const calculateWellnessScore = (record) => {
     if (!record) return 0;
     // Weighted formula: Sleep (40%) + Stress (30%) + Steps (30%)
-    // Stress is inverse (0 is good)
     const sleepScore = record.overall_score || 70;
     const stressScore = Math.max(0, 100 - (record.stress_score || 50));
     const stepScore = Math.min(100, ((record.daily_steps || 5000) / 10000) * 100);
@@ -79,14 +82,13 @@ export const predictNextPeriod = (records, currentPhase) => {
         explanation,
         confidence,
         isMenstruating: p.includes('menstruation'),
-        avgCycle // Pass back to UI
+        avgCycle
     };
 };
 
 export const getMoodPrediction = (phase, sleepScore) => {
     if (sleepScore < 60) return { mood: 'Exhausted', icon: <CloudRain color="#94a3b8" /> };
-
-    // Heuristic based on phase
+    // Translate keys handled in component
     const p = phase?.toLowerCase() || '';
     if (p.includes('luteal')) return { mood: 'Reflective / Low Energy', icon: <Moon color="#6366f1" /> };
     if (p.includes('follicular')) return { mood: 'Energetic / Creative', icon: <Sun color="#f59e0b" /> };
@@ -100,7 +102,6 @@ export const getAIRecommendations = (phase, wellnessScore) => {
     const recs = [];
     if (wellnessScore < 50) recs.push("Prioritize sleep tonight. Your recovery score is low.");
 
-    // Phase based
     const p = phase?.toLowerCase() || '';
     if (p.includes('luteal')) {
         recs.push("Reduce caffeine intake to manage potential anxiety.");
@@ -142,27 +143,31 @@ export const detectPatterns = (history) => {
 
 // --- Components ---
 
-export const WellnessScoreCard = ({ score }) => (
-    <div className="card glass" style={{ textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '4px', background: `linear-gradient(90deg, #ef4444 ${score}%, #e2e8f0 ${score}%)` }}></div>
-        <h3 style={{ marginTop: '1rem', color: 'var(--text-secondary)', fontSize: '1.2rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>AI Wellness Score</h3>
-        <div style={{ fontSize: '4.5rem', fontWeight: 'bold', color: score > 75 ? 'var(--success)' : score > 50 ? 'var(--warning)' : 'var(--danger)' }}>
-            {score || 0}
+export const WellnessScoreCard = ({ score }) => {
+    const { t } = useTranslation();
+    return (
+        <div className="card glass" style={{ textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '4px', background: `linear-gradient(90deg, #ef4444 ${score}%, #e2e8f0 ${score}%)` }}></div>
+            <h3 style={{ marginTop: '1rem', color: 'var(--text-secondary)', fontSize: '1.2rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('wellness_score')}</h3>
+            <div style={{ fontSize: '4.5rem', fontWeight: 'bold', color: score > 75 ? 'var(--success)' : score > 50 ? 'var(--warning)' : 'var(--danger)' }}>
+                {score || 0}
+            </div>
+            <p style={{ fontSize: '1.2rem', opacity: 0.9, fontWeight: 500 }}>
+                {score > 80 ? t('excellent_balance') : score > 50 ? t('moderate_health') : t('needs_attention')}
+            </p>
         </div>
-        <p style={{ fontSize: '1.2rem', opacity: 0.9, fontWeight: 500 }}>
-            {score > 80 ? 'Excellent Balance' : score > 50 ? 'Moderate Health' : 'Needs Attention'}
-        </p>
-    </div>
-);
+    );
+};
 
 export const PeriodPredictionCard = ({ data, onUpdate }) => {
+    const { t } = useTranslation();
     const [isEditing, setIsEditing] = useState(false);
     const [manualCycle, setManualCycle] = useState(data?.avgCycle || 28);
 
     if (!data) return (
         <div className="card glass" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: 'var(--text-secondary)' }}>
             <Calendar size={32} style={{ marginBottom: '1rem', opacity: 0.5 }} />
-            <p>Log period dates to see predictions</p>
+            <p>{t('log_period_msg')}</p>
         </div>
     );
 
@@ -184,7 +189,7 @@ export const PeriodPredictionCard = ({ data, onUpdate }) => {
             </button>
 
             <h3 style={{ fontSize: '1rem', color: 'var(--text-secondary)', marginBottom: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Calendar size={18} /> Cycle Prediction
+                <Calendar size={18} /> {t('cycle_prediction')}
             </h3>
 
             {isEditing ? (
@@ -197,25 +202,25 @@ export const PeriodPredictionCard = ({ data, onUpdate }) => {
                             onChange={(e) => setManualCycle(e.target.value)}
                             style={{ width: '60px', padding: '5px', borderRadius: '4px', border: '1px solid var(--border)' }}
                         />
-                        <button onClick={handleSave} className="btn-primary" style={{ padding: '0 10px', fontSize: '0.8rem' }}>Save</button>
+                        <button onClick={handleSave} className="btn-primary" style={{ padding: '0 10px', fontSize: '0.8rem' }}>{t('save')}</button>
                     </div>
                 </div>
             ) : (
                 <>
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.8rem', marginBottom: '0.5rem' }}>
                         <h2 style={{ fontSize: '2.2rem', margin: 0, color: 'var(--primary)' }}>
-                            {data.isMenstruating ? 'Active' : data.date}
+                            {data.isMenstruating ? t('active') : data.date}
                         </h2>
                         {!data.isMenstruating && (
                             <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 500 }}>
-                                (in {data.daysUntil} days)
+                                {t('next_period_in', { days: data.daysUntil })}
                             </span>
                         )}
                     </div>
 
                     <div style={{ padding: '0.6rem', background: 'rgba(255,255,255,0.6)', borderRadius: '8px', fontSize: '0.9rem', border: '1px solid var(--border)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.3rem' }}>
-                            <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>AI Confidence:</span>
+                            <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>{t('ai_confidence')}:</span>
                             <span style={{ color: data.confidence === 'High' || data.confidence === 'Max' ? 'var(--success)' : 'var(--warning)', fontWeight: 600 }}>{data.confidence}</span>
                         </div>
                         <p style={{ margin: 0, color: 'var(--text-secondary)', lineHeight: '1.4' }}>
@@ -229,6 +234,7 @@ export const PeriodPredictionCard = ({ data, onUpdate }) => {
 };
 
 export const ExplainableAI = ({ record, prediction }) => {
+    const { t } = useTranslation();
     if (!record || !prediction) return null;
 
     // Mock Explanation logic (since we don't have SHAP values from backend)
@@ -245,7 +251,7 @@ export const ExplainableAI = ({ record, prediction }) => {
     return (
         <div className="card">
             <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.2rem', fontSize: '1.5rem' }}>
-                <Brain size={24} color="var(--primary)" /> Why this prediction?
+                <Brain size={24} color="var(--primary)" /> {t('why_prediction')}
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 {factors.length > 0 ? factors.map((f, i) => (
@@ -262,17 +268,18 @@ export const ExplainableAI = ({ record, prediction }) => {
 };
 
 export const MoodPredictor = ({ phase, wellnessScore }) => {
+    const { t } = useTranslation();
     const { mood, icon } = getMoodPrediction(phase, wellnessScore);
     return (
         <div className="card glass" style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.1), rgba(236,72,153,0.1))' }}>
-            <h3 style={{ fontSize: '1rem', color: 'var(--text-secondary)', marginBottom: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Predicted Mood & Energy</h3>
+            <h3 style={{ fontSize: '1rem', color: 'var(--text-secondary)', marginBottom: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('mood_energy')}</h3>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
                 <div style={{ padding: '1rem', background: 'white', borderRadius: '50%', boxShadow: 'var(--shadow)' }}>
                     {icon}
                 </div>
                 <div>
                     <h2 style={{ margin: 0, fontSize: '1.8rem' }}>{mood}</h2>
-                    <p style={{ fontSize: '1rem', opacity: 0.8 }}>Based on phase & sleep</p>
+                    <p style={{ fontSize: '1rem', opacity: 0.8 }}>{t('based_on_sleep')}</p>
                 </div>
             </div>
         </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api, { healthService, predictionService, datasetService } from '../services/api';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { Brain, TrendingUp, Calendar, Heart, Zap, Moon, Sparkles, Activity } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import {
     calculateWellnessScore,
     getAIRecommendations,
@@ -13,6 +14,7 @@ import {
     MoodPredictor,
     InsightsTimeline
 } from '../components/HealthIntelligence';
+import Chatbot from '../components/Chatbot';
 
 const StatCard = ({ icon, label, value, unit }) => (
     <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -30,6 +32,7 @@ const StatCard = ({ icon, label, value, unit }) => (
 );
 
 const Dashboard = ({ onDataUpdate }) => {
+    const { t } = useTranslation();
     const [records, setRecords] = useState([]);
     const [predictions, setPredictions] = useState([]);
     const [datasets, setDatasets] = useState([]);
@@ -73,17 +76,17 @@ const Dashboard = ({ onDataUpdate }) => {
             <header style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
                 <div>
                     <h1 className="title-gradient" style={{ fontSize: '2.2rem', marginBottom: '0.5rem' }}>
-                        NeoHealth Intelligence
+                        {t('app_title')}
                     </h1>
                     <p style={{ color: 'var(--text-secondary)' }}>
-                        AI-Powered Cycle & Wellness Analytics
+                        {t('app_subtitle')}
                     </p>
                 </div>
                 <div style={{ display: 'flex', gap: '1rem' }}>
                     <div className="card glass" style={{ padding: '0.8rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
                         <div style={{ textAlign: 'right' }}>
-                            <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>Current Phase</p>
-                            <h3 style={{ margin: 0, color: 'var(--primary)' }}>{latestPrediction ? latestPrediction.phase : 'Needs Data'}</h3>
+                            <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>{t('current_phase')}</p>
+                            <h3 style={{ margin: 0, color: 'var(--primary)' }}>{latestPrediction ? latestPrediction.phase : t('needs_data')}</h3>
                         </div>
                         <Brain size={28} color="var(--primary)" />
                     </div>
@@ -104,7 +107,7 @@ const Dashboard = ({ onDataUpdate }) => {
                 {/* 4. Daily AI Recommendation */}
                 <div className="card" style={{ background: 'linear-gradient(135deg, #1e293b, #334155)', color: 'white' }}>
                     <h3 style={{ fontSize: '0.9rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <Sparkles size={16} color="#fbbf24" /> AI RECOMMENDATION
+                        <Sparkles size={16} color="#fbbf24" /> {t('ai_recommendation')}
                     </h3>
                     <ul style={{ paddingLeft: '1.2rem', fontSize: '0.95rem', lineHeight: '1.6' }}>
                         {recommendations.map((rec, i) => (
@@ -124,7 +127,7 @@ const Dashboard = ({ onDataUpdate }) => {
                     <div className="card">
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
                             <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <Activity size={20} /> Hormone Trends
+                                <Activity size={20} /> {t('hormone_trends')}
                             </h3>
                             <div style={{ fontSize: '0.8rem', display: 'flex', gap: '1rem' }}>
                                 <span style={{ color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '4px' }}>● LH Path</span>
@@ -153,7 +156,7 @@ const Dashboard = ({ onDataUpdate }) => {
 
                     {/* Vitals Chart */}
                     <div className="card">
-                        <h3 style={{ marginBottom: '1.5rem' }}>Physiological Vitals</h3>
+                        <h3 style={{ marginBottom: '1.5rem' }}>{t('physiological_vitals')}</h3>
                         <div style={{ height: '250px' }}>
                             <ResponsiveContainer width="100%" height="100%">
                                 <LineChart data={records}>
@@ -184,22 +187,22 @@ const Dashboard = ({ onDataUpdate }) => {
                         <div style={{ textAlign: 'center', padding: '1rem', background: '#f8fafc', borderRadius: '8px' }}>
                             <Heart size={20} color="#ef4444" style={{ marginBottom: '0.5rem' }} />
                             <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{latestRecord?.avg_resting_heart_rate || '--'}</div>
-                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>BPM</div>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{t('bpm')}</div>
                         </div>
                         <div style={{ textAlign: 'center', padding: '1rem', background: '#f8fafc', borderRadius: '8px' }}>
                             <Zap size={20} color="#f59e0b" style={{ marginBottom: '0.5rem' }} />
                             <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{latestRecord?.daily_steps ? (latestRecord.daily_steps / 1000).toFixed(1) + 'k' : '--'}</div>
-                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Steps</div>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{t('steps')}</div>
                         </div>
                         <div style={{ textAlign: 'center', padding: '1rem', background: '#f8fafc', borderRadius: '8px' }}>
                             <Moon size={20} color="#6366f1" style={{ marginBottom: '0.5rem' }} />
                             <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{latestRecord?.overall_score || '--'}</div>
-                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Sleep Score</div>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{t('sleep_score')}</div>
                         </div>
                         <div style={{ textAlign: 'center', padding: '1rem', background: '#f8fafc', borderRadius: '8px' }}>
                             <TrendingUp size={20} color="#ec4899" style={{ marginBottom: '0.5rem' }} />
                             <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{latestRecord?.stress_score || '--'}</div>
-                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Stress Level</div>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{t('stress_level')}</div>
                         </div>
                     </div>
 
@@ -207,21 +210,31 @@ const Dashboard = ({ onDataUpdate }) => {
                     {globalSummary && (
                         <div className="card" style={{ background: '#0f172a', color: 'white' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', opacity: 0.9 }}>
-                                <Brain size={16} /> Community Insights
+                                <Brain size={16} /> {t('community_insights')}
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end' }}>
                                 <div>
                                     <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{(globalSummary.total_steps / 1000000).toFixed(1)}M</div>
-                                    <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>Steps tracked globally</div>
+                                    <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>{t('steps_tracked')}</div>
                                 </div>
                                 <div style={{ fontSize: '0.8rem', padding: '4px 8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px' }}>
-                                    {globalSummary.total_records.toLocaleString()} Records
+                                    {t('records_count', { count: globalSummary.total_records.toLocaleString() })}
                                 </div>
                             </div>
                         </div>
                     )}
                 </div>
             </div>
+
+            {/* AI Assistant */}
+            <Chatbot healthContext={{
+                phase: latestPrediction?.phase,
+                wellnessScore: wellnessScore,
+                lastPeriod: latestRecord?.last_period_date,
+                nextPeriod: nextPeriodData?.date,
+                symptoms: "None reported explicitly",
+                language: i18n.language // Pass language to chatbot
+            }} />
         </div >
     );
 };

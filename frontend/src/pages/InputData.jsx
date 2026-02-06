@@ -3,7 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { healthService, predictionService } from '../services/api';
 import { Save, Loader2 } from 'lucide-react';
 
+import { useTranslation } from 'react-i18next';
+
 const InputData = () => {
+    const { t } = useTranslation();
     const [formData, setFormData] = useState({
         date: new Date().toISOString().split('T')[0],
         last_period_date: '',
@@ -36,7 +39,7 @@ const InputData = () => {
             navigate('/');
         } catch (err) {
             console.error(err);
-            const errorMsg = err.response?.data?.msg || err.response?.data?.error || 'Error saving data. Please ensure all numeric fields are filled correctly.';
+            const errorMsg = err.response?.data?.msg || err.response?.data?.error || t('error_saving_data');
             alert(errorMsg);
         } finally {
             setLoading(false);
@@ -66,76 +69,76 @@ const InputData = () => {
 
     return (
         <div style={{ padding: '0 2rem 4rem' }}>
-            <h2 className="title-gradient" style={{ marginBottom: '2rem' }}>Log Your Daily Health</h2>
+            <h2 className="title-gradient" style={{ marginBottom: '2rem' }}>{t('log_daily_health')}</h2>
 
             <form onSubmit={handleSubmit} className="card" style={{ maxWidth: '850px', margin: '0 auto' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1.2fr) 1fr', gap: '2rem' }}>
                     <div>
-                        <h3 style={{ marginBottom: '1.5rem', color: 'var(--primary)' }}>Hormones & Vitals</h3>
+                        <h3 style={{ marginBottom: '1.5rem', color: 'var(--primary)' }}>{t('hormones_vitals')}</h3>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
                             <div>
-                                <label style={{ fontSize: '0.85rem' }}>Entry Date</label>
+                                <label style={{ fontSize: '0.85rem' }}>{t('entry_date')}</label>
                                 <input type="date" name="date" value={formData.date} onChange={handleChange} style={{ width: '100%' }} required />
                             </div>
                             <div>
-                                <label style={{ fontSize: '0.85rem' }}>Last Period Start Date</label>
+                                <label style={{ fontSize: '0.85rem' }}>{t('last_period_start')}</label>
                                 <input type="date" name="last_period_date" value={formData.last_period_date} onChange={handleChange} style={{ width: '100%' }} />
                             </div>
                         </div>
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.2rem' }}>
                             <div>
-                                <label style={{ fontSize: '0.85rem' }}>LH Level (mIU/mL)</label>
+                                <label style={{ fontSize: '0.85rem' }}>{t('lh_level')} (mIU/mL)</label>
                                 <input type="number" step="0.1" name="lh" value={formData.lh} onChange={handleChange} placeholder="e.g. 5.0 - 20.0" style={{ width: '100%' }} />
-                                <small style={{ opacity: 0.6, fontSize: '0.7rem' }}>Normal: 1.9 - 14.6</small>
+                                <small style={{ opacity: 0.6, fontSize: '0.7rem' }}>{t('normal')}: 1.9 - 14.6</small>
                             </div>
                             <div>
-                                <label style={{ fontSize: '0.85rem' }}>Estrogen (pg/mL)</label>
+                                <label style={{ fontSize: '0.85rem' }}>{t('estrogen')} (pg/mL)</label>
                                 <input type="number" step="0.1" name="estrogen" value={formData.estrogen} onChange={handleChange} placeholder="e.g. 100 - 400" style={{ width: '100%' }} />
-                                <small style={{ opacity: 0.6, fontSize: '0.7rem' }}>Normal: 30 - 400</small>
+                                <small style={{ opacity: 0.6, fontSize: '0.7rem' }}>{t('normal')}: 30 - 400</small>
                             </div>
                             <div>
-                                <label style={{ fontSize: '0.85rem' }}>PdG (ug/mL)</label>
+                                <label style={{ fontSize: '0.85rem' }}>{t('pdg')} (ug/mL)</label>
                                 <input type="number" step="0.1" name="pdg" value={formData.pdg} onChange={handleChange} placeholder="e.g. 5.0 - 25.0" style={{ width: '100%' }} />
-                                <small style={{ opacity: 0.6, fontSize: '0.7rem' }}>Progesterone metabolite</small>
+                                <small style={{ opacity: 0.6, fontSize: '0.7rem' }}>{t('progesterone_metabolite')}</small>
                             </div>
                             <div>
-                                <label style={{ fontSize: '0.85rem' }}>Sleep Score (0-100)</label>
+                                <label style={{ fontSize: '0.85rem' }}>{t('sleep_score')} (0-100)</label>
                                 <input type="number" name="overall_score" value={formData.overall_score} onChange={handleChange} placeholder="e.g. 85" style={{ width: '100%' }} />
-                                <small style={{ opacity: 0.6, fontSize: '0.7rem' }}>From your smart watch</small>
+                                <small style={{ opacity: 0.6, fontSize: '0.7rem' }}>{t('from_smart_watch')}</small>
                             </div>
                             <div>
-                                <label style={{ fontSize: '0.85rem' }}>Deep Sleep (Mins)</label>
+                                <label style={{ fontSize: '0.85rem' }}>{t('deep_sleep')} (Mins)</label>
                                 <input type="number" name="deep_sleep_in_minutes" value={formData.deep_sleep_in_minutes} onChange={handleChange} placeholder="e.g. 90" style={{ width: '100%' }} />
-                                <small style={{ opacity: 0.6, fontSize: '0.7rem' }}>Suggested: 60 - 120</small>
+                                <small style={{ opacity: 0.6, fontSize: '0.7rem' }}>{t('suggested')}: 60 - 120</small>
                             </div>
                             <div>
-                                <label style={{ fontSize: '0.85rem' }}>Heart Rate (Avg BPM)</label>
+                                <label style={{ fontSize: '0.85rem' }}>{t('heart_rate')} (Avg BPM)</label>
                                 <input type="number" name="avg_resting_heart_rate" value={formData.avg_resting_heart_rate} onChange={handleChange} placeholder="e.g. 72" style={{ width: '100%' }} />
-                                <small style={{ opacity: 0.6, fontSize: '0.7rem' }}>Normal: 60 - 100</small>
+                                <small style={{ opacity: 0.6, fontSize: '0.7rem' }}>{t('normal')}: 60 - 100</small>
                             </div>
                             <div>
-                                <label style={{ fontSize: '0.85rem' }}>Stress Score (0-100)</label>
+                                <label style={{ fontSize: '0.85rem' }}>{t('stress_score')} (0-100)</label>
                                 <input type="number" name="stress_score" value={formData.stress_score} onChange={handleChange} placeholder="e.g. 20" style={{ width: '100%' }} />
-                                <small style={{ opacity: 0.6, fontSize: '0.7rem' }}>Lower is better</small>
+                                <small style={{ opacity: 0.6, fontSize: '0.7rem' }}>{t('lower_is_better')}</small>
                             </div>
                             <div>
-                                <label style={{ fontSize: '0.85rem' }}>Daily Steps</label>
+                                <label style={{ fontSize: '0.85rem' }}>{t('daily_steps')}</label>
                                 <input type="number" name="daily_steps" value={formData.daily_steps} onChange={handleChange} placeholder="e.g. 8000" style={{ width: '100%' }} />
-                                <small style={{ opacity: 0.6, fontSize: '0.7rem' }}>Recommended: 7000+</small>
+                                <small style={{ opacity: 0.6, fontSize: '0.7rem' }}>{t('recommended')}: 7000+</small>
                             </div>
                         </div>
                     </div>
 
                     <div>
-                        <h3 style={{ marginBottom: '1.5rem', color: 'var(--secondary)' }}>Symptoms (0-4 Scale)</h3>
-                        <p style={{ fontSize: '0.8rem', opacity: 0.7, marginBottom: '1rem' }}>0: None, 1: Mild, 2: Moderate, 3: High, 4: Severe</p>
+                        <h3 style={{ marginBottom: '1.5rem', color: 'var(--secondary)' }}>{t('symptoms_scale')}</h3>
+                        <p style={{ fontSize: '0.8rem', opacity: 0.7, marginBottom: '1rem' }}>{t('symptoms_legend')}</p>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.2rem' }}>
-                            <div><label style={{ fontSize: '0.85rem' }}>Cramps</label><LikertScale name="cramps" current={formData.cramps} /></div>
-                            <div><label style={{ fontSize: '0.85rem' }}>Fatigue</label><LikertScale name="fatigue" current={formData.fatigue} /></div>
-                            <div><label style={{ fontSize: '0.85rem' }}>Mood Swings</label><LikertScale name="moodswing" current={formData.moodswing} /></div>
-                            <div><label style={{ fontSize: '0.85rem' }}>Bloating</label><LikertScale name="bloating" current={formData.bloating} /></div>
-                            <div><label style={{ fontSize: '0.85rem' }}>Sleep Issues</label><LikertScale name="sleepissue" current={formData.sleepissue} /></div>
+                            <div><label style={{ fontSize: '0.85rem' }}>{t('cramps')}</label><LikertScale name="cramps" current={formData.cramps} /></div>
+                            <div><label style={{ fontSize: '0.85rem' }}>{t('fatigue')}</label><LikertScale name="fatigue" current={formData.fatigue} /></div>
+                            <div><label style={{ fontSize: '0.85rem' }}>{t('mood_swings')}</label><LikertScale name="moodswing" current={formData.moodswing} /></div>
+                            <div><label style={{ fontSize: '0.85rem' }}>{t('bloating')}</label><LikertScale name="bloating" current={formData.bloating} /></div>
+                            <div><label style={{ fontSize: '0.85rem' }}>{t('sleep_issues')}</label><LikertScale name="sleepissue" current={formData.sleepissue} /></div>
                         </div>
                     </div>
                 </div>
@@ -143,7 +146,7 @@ const InputData = () => {
                 <div style={{ marginTop: '3rem', textAlign: 'center' }}>
                     <button type="submit" disabled={loading} className="btn-primary" style={{ padding: '12px 48px', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.8rem', margin: '0 auto' }}>
                         {loading ? <Loader2 className="animate-spin" /> : <Save />}
-                        {loading ? 'Processing AI Prediction...' : 'Save & Run AI Prediction'}
+                        {loading ? t('processing_prediction') : t('save_run_prediction')}
                     </button>
                 </div>
             </form>
