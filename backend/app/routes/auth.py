@@ -69,3 +69,31 @@ def me():
     if not user:
         return jsonify({"msg": "User not found"}), 404
     return jsonify(id=user.id, username=user.username, email=user.email, mobile=user.mobile)
+
+@bp.route('/profile', methods=['PUT'])
+@jwt_required()
+def update_profile():
+    user_id = int(get_jwt_identity())
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"msg": "User not found"}), 404
+        
+    data = request.get_json()
+    
+    if 'username' in data:
+        # Check uniqueness if changed
+        if data['username'] != user.username and User.query.filter_by(username=data['username']).first():
+             return jsonify({"msg": "Username already exists"}), 400
+        user.username = data['username']
+        
+    if 'email' in data:
+        if data['email'] != user.email and User.query.filter_by(email=data['email']).first():
+             return jsonify({"msg": "Email already exists"}), 400
+        user.email = data['email']
+        
+    if 'password' in data and data['password']:
+        user.set_password(data['password'])
+        
+    db.session.commit()
+    
+    return jsonify({"msg": "Profile updated successfully", "user": {"id": user.id, "username": user.username, "email": user.email, "mobile": user.mobile}}), 200

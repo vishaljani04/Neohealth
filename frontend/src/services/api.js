@@ -19,10 +19,12 @@ export const authService = {
   register: (userData) => api.post('/auth/register', userData),
   me: () => api.get('/auth/me'),
   checkMobile: (mobile) => api.post('/auth/check-mobile', { mobile }),
+  updateProfile: (data) => api.put('/auth/profile', data),
 };
 
 export const healthService = {
   addRecord: (data) => api.post('/health/record', data),
+  updateRecord: (id, data) => api.put(`/health/record/${id}`, data),
   getRecords: () => api.get('/health/records'),
 };
 

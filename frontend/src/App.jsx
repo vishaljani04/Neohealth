@@ -13,6 +13,7 @@ function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showSplash, setShowSplash] = useState(true);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -31,6 +32,10 @@ function App() {
     checkAuth();
   }, []);
 
+  const handleDataUpdate = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
+
   if (showSplash) {
     return <SplashScreen onFinish={() => setShowSplash(false)} />;
   }
@@ -41,13 +46,13 @@ function App() {
   return (
     <Router>
       <div className="app-container">
-        {user && <Navbar user={user} setUser={setUser} />}
+        {user && <Navbar user={user} setUser={setUser} onDataUpdate={handleDataUpdate} />}
         <main className="content">
           <Routes>
             <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
             <Route path="/register" element={!user ? <Register /> : <Navigate to="/" />} />
             {/* If user is not logged in, redirect to Login. This happens automatically after Splash via Navigate */}
-            <Route path="/" element={user ? <Dashboard /> : <Navigate to="/login" />} />
+            <Route path="/" element={user ? <Dashboard key={refreshTrigger} onDataUpdate={handleDataUpdate} /> : <Navigate to="/login" />} />
             <Route path="/input" element={user ? <InputData /> : <Navigate to="/login" />} />
           </Routes>
         </main>

@@ -14,7 +14,10 @@ def add_record():
     data = request.get_json()
     
     date_str = data.get('date', datetime.utcnow().strftime('%Y-%m-%d'))
-    record_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+    try:
+        record_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+    except ValueError:
+        return jsonify({"msg": "Invalid date format. Use YYYY-MM-DD"}), 400
     
     # Clean data for HealthRecord model
     cleaned_data = {}
@@ -59,6 +62,54 @@ def add_record():
     except Exception as e:
         db.session.rollback()
         print(f"DEBUG: Health Record Error: {str(e)}")
+        return jsonify({"msg": "Database error", "error": str(e)}), 500
+
+@bp.route('/record/<int:id>', methods=['PUT'])
+@jwt_required()
+def update_record_by_id(id):
+    user_id = int(get_jwt_identity())
+    record = HealthRecord.query.filter_by(id=id, user_id=user_id).first()
+    
+    if not record:
+        return jsonify({"msg": "Record not found"}), 404
+        
+    data = request.get_json()
+    
+    # Allow date update if needed, but check conflict
+    if 'date' in data:
+        try:
+            new_date = datetime.strptime(data['date'], '%Y-%m-%d').date()
+            if new_date != record.date:
+                conflict = HealthRecord.query.filter_by(user_id=user_id, date=new_date).first()
+                if conflict:
+                    return jsonify({"msg": "A record for this date already exists"}), 400
+                record.date = new_date
+        except ValueError:
+             return jsonify({"msg": "Invalid date format"}), 400
+
+    numeric_fields = ['lh', 'estrogen', 'pdg', 'overall_score', 'deep_sleep_in_minutes', 
+                      'avg_resting_heart_rate', 'stress_score', 'daily_steps']
+    integer_fields = ['cramps', 'fatigue', 'moodswing', 'stress', 'bloating', 'sleepissue']
+    
+    for field in numeric_fields:
+        if field in data:  # Only update present fields
+            try:
+                setattr(record, field, float(data[field]) if data[field] is not None and data[field] != '' else None)
+            except:
+                pass
+                
+    for field in integer_fields:
+        if field in data:
+            try:
+                setattr(record, field, int(data[field]) if data[field] is not None and data[field] != '' else None)
+            except:
+                pass
+
+    try:
+        db.session.commit()
+        return jsonify({"msg": "Record updated successfully"}), 200
+    except Exception as e:
+        db.session.rollback()
         return jsonify({"msg": "Database error", "error": str(e)}), 500
 
 @bp.route('/records', methods=['GET'])
