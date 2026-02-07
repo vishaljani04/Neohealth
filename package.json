@@ -1,13 +1,17 @@
 {
-  "name": "neohealth",
+  "name": "neohealth-ai",
   "version": "1.0.0",
-  "description": "Root script to run both backend and frontend",
+  "private": true,
+  "description": "NeoHealth AI - Healthcare Analytics Platform",
   "scripts": {
-    "start": "concurrently \"npm run backend\" \"npm run frontend\"",
-    "backend": "cd backend && (if exist venv\\Scripts\\activate (call venv\\Scripts\\activate) else (call ..\\venv\\Scripts\\activate)) && python run.py",
-    "frontend": "cd frontend && npm run dev"
+    "setup": "npm run setup:backend && npm run setup:frontend",
+    "setup:backend": "pip install -r requirements.txt",
+    "setup:frontend": "cd frontend && npm install",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && python run.py",
+    "dev:frontend": "cd frontend && npm run dev"
   },
   "devDependencies": {
-    "concurrently": "^8.0.0"
+    "concurrently": "^9.1.2"
   }
 }

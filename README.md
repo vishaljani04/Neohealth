@@ -76,42 +76,41 @@ git clone https://github.com/vishaljani04/Neohealth.git
 cd Neohealth
 ```
 
-### 2. Backend Setup
+### ⚙️ Quick Installation (All-in-One)
+Now you can set up both backend and frontend from the root folder!
+
+#### 1. Setup Environment
 ```bash
-# Build/Activate Virtual Environment (Optional but Recommended)
-python -m venv venv
-.\venv\Scripts\activate
+# Installs both Python (pip) and Node (npm) dependencies automatically
+npm run setup
+```
 
-# Install dependencies from root
-pip install -r requirements.txt
-
-# Configure Environment
+#### 2. Configure Backend
+```bash
 cd backend
 cp .env.example .env
+# Open .env and fill in your keys (GEMINI_API_KEY, DATABASE_URL, etc.)
 ```
-*Note: Open `.env` and fill in your `SECRET_KEY`, `DATABASE_URL`, and API Keys.*
 
-### 3. Frontend Setup
+#### 3. Run Everything
 ```bash
-cd frontend
-npm install
+# From the root folder, starts both Backend & Frontend together
 npm run dev
 ```
 
 ---
 
 ## 📂 Project Structure
+All requirement files are now in the **Root Folder**:
+- `requirements.txt` (Python/Backend Dependencies)
+- `package.json` (Node/Frontend Dependencies & Setup Scripts)
+
 ```
 NeoHealth/
+├── requirements.txt    # ← Backend Requirements
+├── package.json         # ← Frontend Requirements & Global Scripts
 ├── backend/            # Flask API & AI Logic
-│   ├── app/routes/     # API Endpoints (Chat, Auth, Health)
-│   ├── ml_models/      # XGBoost Pickles
-│   └── run.py          # Entry Point
-├── frontend/           # React Web App
-│   ├── src/i18n.js     # Translation Config
-│   ├── src/pages/      # Dashboard, InputData
-│   └── src/components/ # Chatbot, Navbar
-└── data/               # Research Datasets (Steps, HR, etc.)
+└── frontend/           # React Web App
 ```
 
 ---
