@@ -1,47 +1,29 @@
-# NeoHealth AI - Healthcare Analytics Platform
+# NeoHealth
 
-## 📋 Project Overview
-**NeoHealth AI** is a production-grade healthcare analytics platform designed to empower women with actionable health insights. By leveraging advanced machine learning and Generative AI, the platform predicts menstrual phases, provides a comprehensive wellness dashboard, and offers a multilingual AI Health Assistant for personalized advice.
-
-**Major Update (February 2025):** transformed from a static prototype to a **Fully Integrated Full-Stack Application** with a live Python/Flask backend and PostgreSQL database. The UI is now completely responsive across Desktop, Tablet, and Mobile devices.
+### *Empowering Women Through AI-Driven Healthcare Analytics*
 
 ---
 
-## ✨ Unique & New Features (Phase 2 Update)
+## 📝 Description
+**NeoHealth** is a comprehensive healthcare platform designed to provide women with deep insights into their physiological health. By combining machine learning, real-time data tracking, and generative AI, the platform offers a holistic approach to wellness management. It transforms complex hormonal data into actionable insights, helping users understand their bodies better through every phase of their cycle.
 
-### 1. 🤖 Multilingual AI Health Assistant
-A context-aware chatbot powered by **Google Gemini AI**.
-- **Context-Integrated**: It doesn't just chat; it knows your current cycle phase, wellness score, and recent symptoms to give personalized advice.
-- **Multilingual Support**: Fully operational in **English (EN)**, **Hindi (HI)**, and **Gujarati (GU)**.
-- **Natural Language**: Ask about period cramps, diet tips for the follicular phase, or why your stress levels are high.
+## 📖 Abstract
+In many healthcare systems, monitoring reproductive and hormonal health can be fragmented and data-heavy. NeoHealth addresses this by providing a unified, AI-enhanced interface that analyzes physiological trends such as Estrogen, LH (Luteinizing Hormone), PdG, and physical activities like heart rate and step counts. 
 
-### 2. 🌍 Advanced Internationalization (i18n)
-The entire application UI has been localized to support a diverse user base:
-- **Dynamic Language Switching**: Toggle between English, Hindi, and Gujarati instantly without reloading.
-- **Localized Content**: Labels, charts, predictions, and forms are fully translated to ensure accessibility.
-
-### 3. 🧠 Smart Period Prediction Engine
-An upgraded prediction logic that uses multiple sources:
-- **XGBoost Inference**: Machine learning for phase classification.
-- **Heuristic Logic**: Custom algorithms to predict exact future period dates based on historical data.
-- **Manual Overrides**: Allows users to set their manual cycle length for personalized accuracy.
-- **Confidence Scoring**: Transparent AI confidence levels for every prediction.
-
-### 4. 📊 Full-Screen Premium Dashboard
-Redesigned layout for a "wow" factor:
-- **Edge-to-Edge Design**: Optimized for modern wide monitors with a balanced centering system.
-- **Responsive Mobile & Tablet View**: The entire application now adapts seamlessly to smaller screens with a native app-like feel, including a collapsible navigation menu.
-- **Glassmorphism UI**: High-gloss, modern aesthetic using translucent layers and vibrant gradients.
-- **Responsive Analytics**: Real-time Recharts integration (LH, Estrogen, Heart Rate) that scales perfectly.
+The platform utilizes an **XGBoost-driven prediction engine** to forecast menstrual phases with high precision. Furthermore, it integrates a **Google Gemini-powered AI Assistant** that offers context-aware guidance in multiple languages (English, Hindi, and Gujarati). By merging predictive analytics with natural language processing, NeoHealth creates a proactive and accessible health monitoring ecosystem that prioritizes user privacy and data-driven wellness.
 
 ---
 
-## 🚀 Core Features (Base Functionality)
-
-- **🔐 Secure Authentication**: Robust JWT-based user register/login with mobile number verification.
-- **📈 Trend Analysis**: Historical reviews of LH, Estrogen, PdG, heart rate, and steps.
-- **📝 Comprehensive Logging**: Easy-to-use forms for daily symptoms, sleep score, and stress tracking.
-- **🧩 Explainable AI (XAI)**: Features like "Why this prediction?" break down the data logic behind the AI's conclusions.
+## 🚀 All Features
+- **Smart Cycle Tracking**: Automatic prediction of menstrual phases using advanced ML models.
+- **Multilingual AI Health Assistant**: A context-aware chatbot (Gemini AI) that understands your health data and responds in English, Hindi, and Gujarati.
+- **Interactive Wellness Dashboard**: A premium, high-gloss interface featuring real-time health analytics via Recharts.
+- **Trend Analysis & Visualization**: Long-term tracking and graphical representation of Estrogen, LH, PdG, Heart Rate, and Step Count.
+- **Global Accessibility (i18n)**: Instant language switching across the entire UI for a localized experience.
+- **Explainable AI (XAI)**: Provides transparent insights into "Why" a specific prediction was made, breaking down the logic behind the AI.
+- **Secure Authentication**: Robust JWT-based registration and login system ensuring user data security.
+- **Comprehensive Daily Logging**: Easy-to-use forms for tracking daily symptoms, sleep quality, stress levels, and more.
+- **Responsive Design**: Optimized experience across Desktop, Tablet, and Mobile devices with a native app-like feel.
 
 ---
 
@@ -49,26 +31,26 @@ Redesigned layout for a "wow" factor:
 
 ### Frontend
 - **Framework**: React 19 + Vite
-- **Localization**: i18next + react-i18next
+- **Localization**: i18next
 - **Visualization**: Recharts
-- **Icons**: Lucide-React
+- **Icons**: Lucide React
 - **Animations**: Framer Motion
 
 ### Backend
-- **Framework**: Flask (Python)
-- **AI Engine**: Google Gemini API (Generative AI)
-- **ML Models**: XGBoost, Scikit-Learn
+- **Framework**: Python + Flask
+- **AI Engine**: Google Gemini API
+- **ML Models**: XGBoost, Scikit-Learn, Pandas
 - **Database**: PostgreSQL / SQLAlchemy
 - **Authentication**: Flask-JWT-Extended
 
 ---
 
-## ⚙ Installation & Setup
+## ⚙️ Installation & Setup
 
 ### Prerequisites
 - Node.js (v18+)
 - Python (v3.9+)
-- Gemini API Key (Optional, for Chatbot)
+- PostgreSQL Database
 
 ### 1. Clone the Repository
 ```bash
@@ -76,47 +58,49 @@ git clone https://github.com/vishaljani04/Neohealth.git
 cd Neohealth
 ```
 
-### ⚙️ Quick Installation (All-in-One)
-Now you can set up both backend and frontend from the root folder!
-
-#### 1. Setup Environment
+### 2. Install Dependencies
+You can set up both the frontend and backend automatically from the root folder:
 ```bash
-# Installs both Python (pip) and Node (npm) dependencies automatically
 npm run setup
 ```
 
-#### 2. Configure Backend
+### 3. Environment Configuration
+Navigate to the `backend` folder and set up your `.env` file:
 ```bash
 cd backend
 cp .env.example .env
-# Open .env and fill in your keys (GEMINI_API_KEY, DATABASE_URL, etc.)
+# Open .env and add your GEMINI_API_KEY and DATABASE_URL
 ```
 
-#### 3. Run Everything
+### 4. Run the Application
+From the root folder, start both the Backend and Frontend concurrently:
 ```bash
-# From the root folder, starts both Backend & Frontend together
 npm run dev
 ```
 
 ---
 
 ## 📂 Project Structure
-All requirement files are now in the **Root Folder**:
-- `requirements.txt` (Python/Backend Dependencies)
-- `package.json` (Node/Frontend Dependencies & Setup Scripts)
-
-```
+```text
 NeoHealth/
-├── requirements.txt    # ← Backend Requirements
-├── package.json         # ← Frontend Requirements & Global Scripts
-├── backend/            # Flask API & AI Logic
-└── frontend/           # React Web App
+├── requirements.txt    # Integrated Python dependencies
+├── package.json        # Frontend dependencies & root scripts
+├── backend/            # Flask API, AI Logic & ML Models
+│   ├── app/            # Core API routes & controllers
+│   ├── ml_models/      # Pre-trained XGBoost models
+│   └── run.py          # Backend entry point
+└── frontend/           # React Application
+    ├── src/            # Source code (Components & Pages)
+    └── public/         # Static assets & localization files
 ```
 
 ---
 
 ## 👥 Contributors
-- **Vishal Jani** - *Full Stack Developer*
-- **Chirag Mandani** - *Full Stack Developer*
-- **Zeel Panchal** - *AI/ML Engineer*
-- **Bansari Patel** - *AI/ML Engineer*
+1. **Zeel Panchal**
+2. **Chirag Mandani**
+3. **Bansari Patel**
+4. **Vishal Jani**
+
+---
+© 2026 NeoHealth. Built for modern wellness.
