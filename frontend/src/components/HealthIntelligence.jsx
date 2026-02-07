@@ -18,6 +18,15 @@ export const calculateWellnessScore = (record) => {
     return Math.round((sleepScore * 0.4) + (stressScore * 0.3) + (stepScore * 0.3));
 };
 
+export const calculateWellnessTrend = (records) => {
+    if (!records || records.length < 2) return 'stable';
+    const current = calculateWellnessScore(records[records.length - 1]);
+    const previous = calculateWellnessScore(records[records.length - 2]);
+    if (current > previous + 2) return 'improving';
+    if (current < previous - 2) return 'declining';
+    return 'stable';
+};
+
 export const predictNextPeriod = (records, currentPhase) => {
     // 1. Find unique period start dates
     const periodDates = records && records.length > 0 ? records
@@ -68,12 +77,25 @@ export const predictNextPeriod = (records, currentPhase) => {
     let confidence = "Medium";
 
     const p = currentPhase?.toLowerCase() || '';
+    const lastRecord = records && records.length > 0 ? records[records.length - 1] : null;
+
     if (p.includes('luteal')) {
-        explanation = "Luteal phase indicators confirm period is approaching.";
+        explanation = "Luteal phase detected. Period is approaching.";
         confidence = "High";
+
+        // Smart Confidence Boost if User Reports Symptoms
+        if (lastRecord) {
+            const symptoms = (lastRecord.cramps || 0) + (lastRecord.bloating || 0) + (lastRecord.moodswing || 0);
+            if (symptoms >= 3) { // User is reporting PMS
+                confidence = "Very High";
+                explanation = "Rising PMS symptoms confirm your period is imminent.";
+            }
+        }
     } else if (p.includes('menstruation')) {
         explanation = "Currently in menstruation phase.";
         confidence = "Max";
+    } else if (p.includes('ovulation')) {
+        explanation = "Mid-cycle peak. Period follows around 14 days later.";
     }
 
     return {
@@ -120,21 +142,46 @@ export const getAIRecommendations = (phase, wellnessScore) => {
     return recs;
 };
 
-export const detectPatterns = (history) => {
+export const detectPatterns = (history, currentPhase) => {
     if (!history || history.length < 3) return [];
 
     const patterns = [];
-    const recent = history.slice(-3); // Last 3 days
+    const recent = history.slice(-4); // Last 4 days for broader trend
 
-    // Check increasing stress
-    if (recent[0].stress_score < recent[1].stress_score && recent[1].stress_score < recent[2].stress_score) {
+    // 1. Check Increasing Stress
+    if (recent.length >= 3 && recent[0].stress_score < recent[1].stress_score && recent[1].stress_score < recent[2].stress_score) {
         patterns.push({ type: 'warning', msg: 'Stress levels are trending upward over the last 3 days.' });
     }
 
-    // Check low sleep
-    const avgSleep = recent.reduce((sum, r) => sum + (r.overall_score || 0), 0) / 3;
-    if (avgSleep < 70) {
-        patterns.push({ type: 'alert', msg: 'Consistent low sleep quality detected.' });
+    // 2. Check Low Sleep persistence
+    const avgSleep = recent.reduce((sum, r) => sum + (r.overall_score || 0), 0) / recent.length;
+    if (avgSleep < 65) {
+        patterns.push({ type: 'alert', msg: 'Chronic low sleep quality detected this week.' });
+    }
+
+    // 3. Phase-Specific Trend Intelligence
+    const p = currentPhase?.toLowerCase() || '';
+
+    // PMS Trend in Luteal
+    if (p.includes('luteal')) {
+        const last = recent[recent.length - 1];
+        const prev = recent[recent.length - 2];
+        const symptomSum = (r) => (r.cramps || 0) + (r.fatigue || 0) + (r.bloating || 0);
+
+        if (symptomSum(last) > symptomSum(prev) && symptomSum(last) > 2) {
+            patterns.push({ type: 'warning', msg: 'Pre-Period Signal: Fatigue & symptoms are rising as expected.' });
+        }
+    }
+
+    // Recovery Trend in Follicular
+    if (p.includes('follicular')) {
+        const last = recent[recent.length - 1];
+        // If energy/wellness is rising
+        const wCurrent = calculateWellnessScore(last);
+        const wPrev = calculateWellnessScore(recent[recent.length - 2]);
+        if (wCurrent > wPrev + 5) {
+            patterns.push({ type: 'success', msg: 'Recovery Trend: Your energy levels are bouncing back!' });
+        }
     }
 
     if (patterns.length === 0) patterns.push({ type: 'success', msg: 'No negative health trends detected.' });
@@ -143,15 +190,41 @@ export const detectPatterns = (history) => {
 
 // --- Components ---
 
-export const WellnessScoreCard = ({ score }) => {
+// --- Components ---
+
+export const WellnessScoreCard = ({ score, isEstimated, trend }) => {
     const { t } = useTranslation();
     return (
         <div className="card glass" style={{ textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+            {isEstimated && (
+                <div style={{
+                    position: 'absolute', top: '10px', right: '10px',
+                    background: 'rgba(99, 102, 241, 0.2)', color: 'var(--primary)',
+                    fontSize: '0.65rem', padding: '2px 8px', borderRadius: '12px',
+                    fontWeight: 'bold', border: '1px solid rgba(99, 102, 241, 0.3)'
+                }}>
+                    AI Estimated
+                </div>
+            )}
             <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '4px', background: `linear-gradient(90deg, #ef4444 ${score}%, #e2e8f0 ${score}%)` }}></div>
             <h3 style={{ marginTop: '1rem', color: 'var(--text-secondary)', fontSize: '1.2rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('wellness_score')}</h3>
-            <div style={{ fontSize: '4.5rem', fontWeight: 'bold', color: score > 75 ? 'var(--success)' : score > 50 ? 'var(--warning)' : 'var(--danger)' }}>
-                {score || 0}
+
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                <div style={{ fontSize: '4.5rem', fontWeight: 'bold', color: score > 75 ? 'var(--success)' : score > 50 ? 'var(--warning)' : 'var(--danger)' }}>
+                    {score || 0}
+                </div>
+                {trend && trend !== 'stable' && (
+                    <div style={{
+                        display: 'flex', flexDirection: 'column', alignItems: 'center',
+                        color: trend === 'improving' ? 'var(--success)' : 'var(--danger)',
+                        opacity: 0.8
+                    }}>
+                        {trend === 'improving' ? <TrendingUp size={24} /> : <TrendingUp size={24} style={{ transform: 'scaleY(-1)' }} />}
+                        <span style={{ fontSize: '0.7rem', fontWeight: 'bold' }}>{trend === 'improving' ? 'RISING' : 'DROPPING'}</span>
+                    </div>
+                )}
             </div>
+
             <p style={{ fontSize: '1.2rem', opacity: 0.9, fontWeight: 500 }}>
                 {score > 80 ? t('excellent_balance') : score > 50 ? t('moderate_health') : t('needs_attention')}
             </p>
@@ -267,11 +340,21 @@ export const ExplainableAI = ({ record, prediction }) => {
     );
 };
 
-export const MoodPredictor = ({ phase, wellnessScore }) => {
+export const MoodPredictor = ({ phase, wellnessScore, isEstimated }) => {
     const { t } = useTranslation();
     const { mood, icon } = getMoodPrediction(phase, wellnessScore);
     return (
-        <div className="card glass" style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.1), rgba(236,72,153,0.1))' }}>
+        <div className="card glass" style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.1), rgba(236,72,153,0.1))', position: 'relative' }}>
+            {isEstimated && (
+                <div style={{
+                    position: 'absolute', top: '10px', right: '10px',
+                    background: 'rgba(236, 72, 153, 0.2)', color: 'var(--secondary)',
+                    fontSize: '0.65rem', padding: '2px 8px', borderRadius: '12px',
+                    fontWeight: 'bold', border: '1px solid rgba(236, 72, 153, 0.3)'
+                }}>
+                    AI Estimated
+                </div>
+            )}
             <h3 style={{ fontSize: '1rem', color: 'var(--text-secondary)', marginBottom: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('mood_energy')}</h3>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
                 <div style={{ padding: '1rem', background: 'white', borderRadius: '50%', boxShadow: 'var(--shadow)' }}>

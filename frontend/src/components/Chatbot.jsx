@@ -12,6 +12,7 @@ const Chatbot = ({ healthContext }) => {
     const [messages, setMessages] = useState([
         { id: 1, text: t('chatbot.initialMessage'), sender: 'bot' }
     ]);
+    const [modelType, setModelType] = useState('llama');
     const [inputText, setInputText] = useState('');
     const [isTyping, setIsTyping] = useState(false);
     const messagesEndRef = useRef(null);
@@ -37,7 +38,8 @@ const Chatbot = ({ healthContext }) => {
             // Send to backend with context
             const res = await api.post('/chat/message', {
                 message: userMsg.text,
-                context: healthContext
+                context: healthContext,
+                model: modelType
             });
 
             const botMsg = { id: Date.now() + 1, text: res.data.response, sender: 'bot' };
@@ -62,8 +64,8 @@ const Chatbot = ({ healthContext }) => {
                         transition={{ duration: 0.2 }}
                         className="card glass"
                         style={{
-                            width: isExpanded ? '400px' : '320px',
-                            height: isExpanded ? '600px' : '450px',
+                            width: isExpanded ? '500px' : '380px',
+                            height: isExpanded ? '700px' : '550px',
                             marginBottom: '1rem',
                             display: 'flex',
                             flexDirection: 'column',
@@ -91,6 +93,9 @@ const Chatbot = ({ healthContext }) => {
                                     <span style={{ fontSize: '0.7rem', opacity: 0.8, display: 'block' }}>{t('chatbot.headerSubtitle')}</span>
                                 </div>
                             </div>
+
+
+
                             <div style={{ display: 'flex', gap: '0.5rem' }}>
                                 <button onClick={() => setIsExpanded(!isExpanded)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}>
                                     {isExpanded ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
@@ -115,7 +120,8 @@ const Chatbot = ({ healthContext }) => {
                                         borderTopRightRadius: msg.sender === 'user' ? '2px' : '12px',
                                         boxShadow: msg.sender === 'bot' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none',
                                         fontSize: '0.9rem',
-                                        lineHeight: '1.4'
+                                        lineHeight: '1.5',
+                                        whiteSpace: 'pre-wrap'
                                     }}>
                                         {msg.text}
                                     </div>

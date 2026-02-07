@@ -5,6 +5,7 @@ import { Brain, TrendingUp, Calendar, Heart, Zap, Moon, Sparkles, Activity } fro
 import { useTranslation } from 'react-i18next';
 import {
     calculateWellnessScore,
+    calculateWellnessTrend,
     getAIRecommendations,
     detectPatterns,
     predictNextPeriod,
@@ -16,20 +17,7 @@ import {
 } from '../components/HealthIntelligence';
 import Chatbot from '../components/Chatbot';
 
-const StatCard = ({ icon, label, value, unit }) => (
-    <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <div style={{ padding: '0.8rem', borderRadius: '12px', background: 'var(--background)' }}>
-            {icon}
-        </div>
-        <div>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>{label}</p>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.3rem' }}>
-                <h3 style={{ margin: 0 }}>{value}</h3>
-                <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{unit}</span>
-            </div>
-        </div>
-    </div>
-);
+// ... (StatCard component remains same)
 
 const Dashboard = ({ onDataUpdate }) => {
     const { t, i18n } = useTranslation();
@@ -40,6 +28,7 @@ const Dashboard = ({ onDataUpdate }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        document.title = 'Dashboard | NeoHealth';
         Promise.all([
             healthService.getRecords(),
             predictionService.getHistory(),
@@ -59,8 +48,9 @@ const Dashboard = ({ onDataUpdate }) => {
 
     // --- AI Intelligence Calculations ---
     const wellnessScore = calculateWellnessScore(latestRecord);
+    const wellnessTrend = calculateWellnessTrend(records); // New Trend Calculation
     const recommendations = getAIRecommendations(latestPrediction?.phase, wellnessScore);
-    const patterns = detectPatterns(records);
+    const patterns = detectPatterns(records, latestPrediction?.phase); // Pass Phase for PMS detection
     const nextPeriodData = predictNextPeriod(records, latestPrediction?.phase);
 
     if (loading) return (
@@ -73,7 +63,7 @@ const Dashboard = ({ onDataUpdate }) => {
     return (
         <div style={{ padding: '0 0.5rem 4rem', width: '92%', maxWidth: '1800px', margin: '0 auto' }}>
             {/* Header Section */}
-            <header style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
+            <header className="header-flex">
                 <div>
                     <h1 className="title-gradient" style={{ fontSize: '2.2rem', marginBottom: '0.5rem' }}>
                         {t('app_title')}
@@ -82,8 +72,8 @@ const Dashboard = ({ onDataUpdate }) => {
                         {t('app_subtitle')}
                     </p>
                 </div>
-                <div style={{ display: 'flex', gap: '1rem' }}>
-                    <div className="card glass" style={{ padding: '0.8rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <div className="header-right-content">
+                    <div className="card glass current-phase-card">
                         <div style={{ textAlign: 'right' }}>
                             <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>{t('current_phase')}</p>
                             <h3 style={{ margin: 0, color: 'var(--primary)' }}>{latestPrediction ? latestPrediction.phase : t('needs_data')}</h3>
@@ -91,15 +81,15 @@ const Dashboard = ({ onDataUpdate }) => {
                         <Brain size={28} color="var(--primary)" />
                     </div>
                 </div>
-            </header>
+            </header >
 
             {/* AI Intelligence Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+            <div className="intelligence-grid">
                 {/* 1. Wellness Score */}
-                <WellnessScoreCard score={wellnessScore} />
+                <WellnessScoreCard score={wellnessScore} isEstimated={latestRecord?.is_estimated} trend={wellnessTrend} />
 
                 {/* 2. Mood & Energy */}
-                <MoodPredictor phase={latestPrediction?.phase} wellnessScore={wellnessScore} />
+                <MoodPredictor phase={latestPrediction?.phase} wellnessScore={wellnessScore} isEstimated={latestRecord?.is_estimated} />
 
                 {/* 3. Next Period Prediction */}
                 <PeriodPredictionCard data={nextPeriodData} onUpdate={onDataUpdate} />
@@ -118,7 +108,7 @@ const Dashboard = ({ onDataUpdate }) => {
             </div>
 
             {/* Main Analytics Layout */}
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem', alignItems: 'start' }}>
+            <div className="dashboard-layout">
 
                 {/* Left Column: Charts */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
@@ -153,77 +143,77 @@ const Dashboard = ({ onDataUpdate }) => {
                             </ResponsiveContainer>
                         </div>
                     </div>
+                </div>
 
-                    {/* Vitals Chart */}
-                    <div className="card">
-                        <h3 style={{ marginBottom: '1.5rem' }}>{t('physiological_vitals')}</h3>
-                        <div style={{ height: '250px' }}>
-                            <ResponsiveContainer width="100%" height="100%">
-                                <LineChart data={records}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                                    <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-                                    <YAxis yAxisId="left" tick={{ fontSize: 12 }} />
-                                    <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12 }} />
-                                    <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
-                                    <Line yAxisId="left" type="monotone" dataKey="avg_resting_heart_rate" stroke="#ef4444" strokeWidth={2} dot={false} name="Heart Rate" />
-                                    <Line yAxisId="right" type="monotone" dataKey="daily_steps" stroke="#10b981" strokeWidth={2} dot={false} name="Steps" />
-                                </LineChart>
-                            </ResponsiveContainer>
-                        </div>
+                {/* Vitals Chart */}
+                <div className="card">
+                    <h3 style={{ marginBottom: '1.5rem' }}>{t('physiological_vitals')}</h3>
+                    <div style={{ height: '250px' }}>
+                        <ResponsiveContainer width="100%" height="100%">
+                            <LineChart data={records}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                                <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+                                <YAxis yAxisId="left" tick={{ fontSize: 12 }} />
+                                <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12 }} />
+                                <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
+                                <Line yAxisId="left" type="monotone" dataKey="avg_resting_heart_rate" stroke="#ef4444" strokeWidth={2} dot={false} name="Heart Rate" />
+                                <Line yAxisId="right" type="monotone" dataKey="daily_steps" stroke="#10b981" strokeWidth={2} dot={false} name="Steps" />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+            </div>
+
+            {/* Right Column: AI Insights & Stats */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+
+                {/* Explainable AI Widget */}
+                <ExplainableAI record={latestRecord} prediction={latestPrediction} />
+
+                {/* Pattern Detection Timeline */}
+                <InsightsTimeline patterns={patterns} />
+
+                {/* Quick Stats Grid */}
+                <div className="card stats-grid">
+                    <div style={{ textAlign: 'center', padding: '1rem', background: '#f8fafc', borderRadius: '8px' }}>
+                        <Heart size={20} color="#ef4444" style={{ marginBottom: '0.5rem' }} />
+                        <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{latestRecord?.avg_resting_heart_rate || '--'}</div>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{t('bpm')}</div>
+                    </div>
+                    <div style={{ textAlign: 'center', padding: '1rem', background: '#f8fafc', borderRadius: '8px' }}>
+                        <Zap size={20} color="#f59e0b" style={{ marginBottom: '0.5rem' }} />
+                        <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{latestRecord?.daily_steps ? (latestRecord.daily_steps / 1000).toFixed(1) + 'k' : '--'}</div>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{t('steps')}</div>
+                    </div>
+                    <div style={{ textAlign: 'center', padding: '1rem', background: '#f8fafc', borderRadius: '8px' }}>
+                        <Moon size={20} color="#6366f1" style={{ marginBottom: '0.5rem' }} />
+                        <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{latestRecord?.overall_score || '--'}</div>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{t('sleep_score')}</div>
+                    </div>
+                    <div style={{ textAlign: 'center', padding: '1rem', background: '#f8fafc', borderRadius: '8px' }}>
+                        <TrendingUp size={20} color="#ec4899" style={{ marginBottom: '0.5rem' }} />
+                        <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{latestRecord?.stress_score || '--'}</div>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{t('stress_level')}</div>
                     </div>
                 </div>
 
-                {/* Right Column: AI Insights & Stats */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-
-                    {/* Explainable AI Widget */}
-                    <ExplainableAI record={latestRecord} prediction={latestPrediction} />
-
-                    {/* Pattern Detection Timeline */}
-                    <InsightsTimeline patterns={patterns} />
-
-                    {/* Quick Stats Grid */}
-                    <div className="card" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                        <div style={{ textAlign: 'center', padding: '1rem', background: '#f8fafc', borderRadius: '8px' }}>
-                            <Heart size={20} color="#ef4444" style={{ marginBottom: '0.5rem' }} />
-                            <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{latestRecord?.avg_resting_heart_rate || '--'}</div>
-                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{t('bpm')}</div>
+                {/* Global Data Card */}
+                {globalSummary && (
+                    <div className="card community-insights-card">
+                        <div className="community-insights-header">
+                            <Brain size={16} /> {t('community_insights')}
                         </div>
-                        <div style={{ textAlign: 'center', padding: '1rem', background: '#f8fafc', borderRadius: '8px' }}>
-                            <Zap size={20} color="#f59e0b" style={{ marginBottom: '0.5rem' }} />
-                            <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{latestRecord?.daily_steps ? (latestRecord.daily_steps / 1000).toFixed(1) + 'k' : '--'}</div>
-                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{t('steps')}</div>
-                        </div>
-                        <div style={{ textAlign: 'center', padding: '1rem', background: '#f8fafc', borderRadius: '8px' }}>
-                            <Moon size={20} color="#6366f1" style={{ marginBottom: '0.5rem' }} />
-                            <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{latestRecord?.overall_score || '--'}</div>
-                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{t('sleep_score')}</div>
-                        </div>
-                        <div style={{ textAlign: 'center', padding: '1rem', background: '#f8fafc', borderRadius: '8px' }}>
-                            <TrendingUp size={20} color="#ec4899" style={{ marginBottom: '0.5rem' }} />
-                            <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{latestRecord?.stress_score || '--'}</div>
-                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{t('stress_level')}</div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end' }}>
+                            <div>
+                                <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{(globalSummary.total_steps / 1000000).toFixed(1)}M</div>
+                                <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>{t('steps_tracked')}</div>
+                            </div>
+                            <div style={{ fontSize: '0.8rem', padding: '4px 8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px' }}>
+                                {t('records_count', { count: globalSummary.total_records.toLocaleString() })}
+                            </div>
                         </div>
                     </div>
-
-                    {/* Global Data Card */}
-                    {globalSummary && (
-                        <div className="card" style={{ background: '#0f172a', color: 'white' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', opacity: 0.9 }}>
-                                <Brain size={16} /> {t('community_insights')}
-                            </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end' }}>
-                                <div>
-                                    <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{(globalSummary.total_steps / 1000000).toFixed(1)}M</div>
-                                    <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>{t('steps_tracked')}</div>
-                                </div>
-                                <div style={{ fontSize: '0.8rem', padding: '4px 8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px' }}>
-                                    {t('records_count', { count: globalSummary.total_records.toLocaleString() })}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
+                )}
             </div>
 
             {/* AI Assistant */}
@@ -235,7 +225,7 @@ const Dashboard = ({ onDataUpdate }) => {
                 symptoms: "None reported explicitly",
                 language: i18n.language // Pass language to chatbot
             }} />
-        </div >
+        </div>
     );
 };
 

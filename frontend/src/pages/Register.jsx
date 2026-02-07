@@ -11,6 +11,7 @@ const Register = () => {
     const location = useLocation();
 
     useEffect(() => {
+        document.title = 'Register | NeoHealth';
         if (location.state?.mobile) {
             setFormData(prev => ({ ...prev, mobile: location.state.mobile }));
         }

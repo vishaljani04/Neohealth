@@ -45,3 +45,12 @@ frontend/.local
 # OS
 .DS_Store
 Thumbs.db
+
+# Environment Variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+backend/.env
+frontend/.env

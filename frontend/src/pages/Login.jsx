@@ -11,6 +11,10 @@ const Login = () => {
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
+    React.useEffect(() => {
+        document.title = 'Login | NeoHealth';
+    }, []);
+
     const handleMobileSubmit = async (e) => {
         e.preventDefault();
         setError('');

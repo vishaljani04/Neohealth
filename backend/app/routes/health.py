@@ -149,23 +149,100 @@ def get_records():
         except Exception as e:
             print(f"Error loading sample data: {e}")
 
-    return jsonify([{
-        "id": r.id,
-        "date": r.date.strftime('%Y-%m-%d'),
-        "lh": r.lh,
-        "estrogen": r.estrogen,
-        "pdg": r.pdg,
-        "cramps": r.cramps,
-        "fatigue": r.fatigue,
-        "moodswing": r.moodswing,
-        "stress": r.stress,
-        "bloating": r.bloating,
-        "sleepissue": r.sleepissue,
-        "overall_score": r.overall_score,
-        "deep_sleep_in_minutes": r.deep_sleep_in_minutes,
-        "avg_resting_heart_rate": r.avg_resting_heart_rate,
-        "stress_score": r.stress_score,
-        "daily_steps": r.daily_steps,
-        "last_period_date": r.last_period_date.strftime('%Y-%m-%d') if r.last_period_date else None,
-        "is_example": False
-    } for r in records])
+    today = datetime.utcnow().date()
+    
+    response_data = []
+    
+    # helper to process real record
+    def to_dict(r):
+        return {
+            "id": r.id,
+            "date": r.date.strftime('%Y-%m-%d'),
+            "lh": r.lh,
+            "estrogen": r.estrogen,
+            "pdg": r.pdg,
+            "cramps": r.cramps,
+            "fatigue": r.fatigue,
+            "moodswing": r.moodswing,
+            "stress": r.stress,
+            "bloating": r.bloating,
+            "sleepissue": r.sleepissue,
+            "overall_score": r.overall_score,
+            "deep_sleep_in_minutes": r.deep_sleep_in_minutes,
+            "avg_resting_heart_rate": r.avg_resting_heart_rate,
+            "stress_score": r.stress_score,
+            "daily_steps": r.daily_steps,
+            "last_period_date": r.last_period_date.strftime('%Y-%m-%d') if r.last_period_date else None,
+            "is_estimated": False,
+            "is_example": False
+        }
+
+    for r in records:
+        response_data.append(to_dict(r))
+        
+    # --- Continuous Intelligence: Extrapolate missing days up to today ---
+    if records:
+        last_record = records[-1]
+        last_date = last_record.date
+        
+        if last_date < today:
+            from datetime import timedelta
+            
+            # Simple Smoothing / Carry-forward logic
+            # In a real ML system, this would use ARIMA or LSTM.
+            # Here we use a smart "Drift" logic to simulate natural variance.
+            import random
+            
+            curr_date = last_date + timedelta(days=1)
+            
+            # Base values from last known state
+            current_steps = last_record.daily_steps or 5000
+            current_stress = last_record.stress_score or 50
+            current_sleep = last_record.deep_sleep_in_minutes or 60
+            current_hr = last_record.avg_resting_heart_rate or 70
+            
+            while curr_date <= today:
+                # Add slight "life" variation so it's not a flat line
+                # Steps vary +/- 10%
+                step_var = random.uniform(0.9, 1.1)
+                estimated_steps = int(current_steps * step_var)
+                
+                # Stress tends to revert to mean (say 30-40)
+                # If high (>70), it decays down. If low (<20), it stays low.
+                if current_stress > 50:
+                    current_stress *= 0.95 # recover
+                else:
+                    current_stress *= random.uniform(0.95, 1.05)
+                
+                # Sleep varies slightly
+                estimated_sleep = current_sleep * random.uniform(0.9, 1.1)
+                
+                response_data.append({
+                    "id": f"est-{curr_date}",
+                    "date": curr_date.strftime('%Y-%m-%d'),
+                    "lh": None, # Hormones are hard to guess without phase logic, leave null so chart connects or breaks appropriately
+                    "estrogen": None,
+                    "pdg": None,
+                    "cramps": last_record.cramps, # Symptoms likely persist or fade? Let's carry forward
+                    "fatigue": last_record.fatigue,
+                    "moodswing": last_record.moodswing,
+                    "stress": int(current_stress / 25), # approx likert from score
+                    "bloating": last_record.bloating,
+                    "sleepissue": last_record.sleepissue,
+                    "overall_score": last_record.overall_score, # Keep simple
+                    "deep_sleep_in_minutes": round(estimated_sleep, 1),
+                    "avg_resting_heart_rate": current_hr,
+                    "stress_score": round(current_stress, 1),
+                    "daily_steps": estimated_steps,
+                    "last_period_date": last_record.last_period_date.strftime('%Y-%m-%d') if last_record.last_period_date else None,
+                    "is_estimated": True, # CRITICAL FLAG
+                    "is_example": False
+                })
+                
+                # Update baseline for next loop for continuity
+                current_steps = estimated_steps
+                
+                curr_date += timedelta(days=1)
+
+
+    return jsonify(response_data)

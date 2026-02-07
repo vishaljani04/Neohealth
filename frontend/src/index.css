@@ -29,6 +29,8 @@ body {
   color: var(--text-main);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  /* Prevent horizontal scroll */
 }
 
 button {
@@ -93,4 +95,157 @@ input:focus {
 
 .btn-secondary:hover {
   background: var(--background);
+}
+
+/* --- Responsive Utilities --- */
+
+/* Main Layout Grid (Desktop: 2 Columns, Mobile: 1 Column) */
+.dashboard-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+/* Intelligence Cards Grid (Fixed 4 Columns Desktop) */
+.intelligence-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* Stats Grid (Desktop: 2x2, Mobile: 1 Column or 2x2 depending on width) */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* Header Flex (No Wrap Desktop) */
+.header-flex {
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.community-insights-card {
+  background: #0f172a;
+  color: white;
+}
+
+.community-insights-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  opacity: 0.9;
+}
+
+/* Specific Card Styles */
+.current-phase-card {
+  width: 220px;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Navbar Styles */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.mobile-menu-btn {
+  display: none;
+}
+
+/* Consolidate Responsive Media Queries */
+/* Consolidate Responsive Media Queries */
+@media (max-width: 768px) {
+  .dashboard-layout {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  /* Intelligence Cards: 2 Columns on Tablet */
+  .intelligence-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Header: Vertical Stack on Mobile */
+  .header-flex {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  /* All Header Children Full Width */
+  .header-flex>div {
+    width: 100%;
+  }
+
+  /* Force ALL Cards in Header AND Sidebar to 100% */
+  .header-flex .card,
+  .current-phase-card,
+  .dashboard-layout .card {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+    min-width: 0;
+    /* Allow flex shrinking */
+  }
+
+  /* Reduce general card padding on mobile */
+  .card {
+    padding: 1.5rem;
+  }
+
+  /* Navbar Mobile */
+  .mobile-menu-btn {
+    display: block !important;
+  }
+
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: var(--surface);
+    flex-direction: column;
+    padding: 1.5rem;
+    box-shadow: var(--shadow-lg);
+    border-bottom: 1px solid var(--border);
+    gap: 1.5rem;
+    align-items: flex-start;
+    z-index: 1000;
+  }
+
+  .nav-links.mobile-open {
+    display: flex;
+  }
+}
+
+@media (max-width: 480px) {
+
+  /* Intelligence & Stats: 1 Column on Mobile */
+  .intelligence-grid,
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .title-gradient {
+    font-size: 1.8rem !important;
+  }
+
+  /* Less Padding for small screens */
+  .card {
+    padding: 1rem;
+  }
 }
