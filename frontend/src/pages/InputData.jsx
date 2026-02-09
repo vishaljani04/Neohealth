@@ -64,6 +64,33 @@ const InputData = () => {
             const scores = map[value] || map['busy'];
             setFormData(prev => ({ ...prev, ...scores }));
         }
+        if (category === 'activity') {
+            const map = {
+                'low': { daily_steps: 2500 },
+                'medium': { daily_steps: 6500 },
+                'high': { daily_steps: 10500 }
+            };
+            const scores = map[value] || map['medium'];
+            setFormData(prev => ({ ...prev, ...scores }));
+        }
+        if (category === 'heart') {
+            const map = {
+                'calm': { avg_resting_heart_rate: 62 },
+                'normal': { avg_resting_heart_rate: 72 },
+                'fast': { avg_resting_heart_rate: 88 }
+            };
+            const scores = map[value] || map['normal'];
+            setFormData(prev => ({ ...prev, ...scores }));
+        }
+        if (category === 'hormone_test') {
+            setFormData(prev => ({ ...prev, lh: value === 'pos' ? 25 : 5 }));
+        }
+        if (category === 'temp') {
+            setFormData(prev => ({ ...prev, pdg: value === 'high' ? 15 : 2 }));
+        }
+        if (category === 'fluid') {
+            setFormData(prev => ({ ...prev, estrogen: value === 'fertile' ? 250 : 50 }));
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -82,11 +109,7 @@ const InputData = () => {
             console.error("Save Error:", err);
             const backendMsg = err.response?.data?.msg;
             const backendError = err.response?.data?.error;
-
-            let displayMsg = t('error_saving_data');
-            if (backendMsg) {
-                displayMsg = backendMsg + (backendError ? `\n\nDetails: ${backendError}` : '');
-            }
+            const displayMsg = backendMsg ? `${backendMsg}${backendError ? `\nDetails: ${backendError}` : ''}` : "Failed to save data. Please check your connection or try again.";
 
             alert(displayMsg);
         } finally {
@@ -95,7 +118,7 @@ const InputData = () => {
     };
 
     const LikertScale = ({ name, current }) => (
-        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+        <div className="likert-container">
             {[0, 1, 2, 3, 4].map(v => (
                 <button
                     key={v}
@@ -142,24 +165,31 @@ const InputData = () => {
             <style>{`
                 .input-main-grid {
                     display: grid;
-                    grid-template-columns: minmax(300px, 1.2fr) 1fr;
+                    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
                     gap: 2rem;
                 }
                 .input-sub-grid {
                     display: grid;
                     grid-template-columns: 1fr 1fr;
-                    gap: 1.2rem;
+                    gap: 1.5rem;
+                }
+                .symptoms-pro-grid {
+                    display: grid;
+                    grid-template-columns: 1fr;
+                    gap: 1.5rem;
                 }
                 .toggle-container {
                     display: flex;
+                    flex-wrap: wrap;
                     background: #e2e8f0;
                     padding: 4px;
                     border-radius: 99px;
                     width: fit-content;
-                    margin: 0 auto 2rem;
+                    margin: 0 auto 2.5rem;
+                    justify-content: center;
                 }
                 .toggle-btn {
-                    padding: 8px 24px;
+                    padding: 10px 24px;
                     border-radius: 99px;
                     border: none;
                     background: transparent;
@@ -167,11 +197,36 @@ const InputData = () => {
                     font-weight: 500;
                     cursor: pointer;
                     transition: all 0.3s ease;
+                    white-space: nowrap;
                 }
                 .toggle-btn.active {
                     background: white;
                     color: var(--primary);
                     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                }
+                .likert-container {
+                    display: flex;
+                    gap: 0.6rem;
+                    margin-top: 0.6rem;
+                    flex-wrap: wrap;
+                }
+                .pro-input-group {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.4rem;
+                }
+                .pro-input-group label {
+                    font-size: 0.85rem;
+                    font-weight: 500;
+                    color: var(--text-main);
+                }
+                .pro-input-group input {
+                    width: 100% !important;
+                }
+                .pro-input-group small {
+                    opacity: 0.6;
+                    font-size: 0.7rem;
+                    line-height: 1.2;
                 }
                 @media (max-width: 768px) {
                     .input-page-container {
@@ -180,6 +235,27 @@ const InputData = () => {
                     .input-main-grid {
                         grid-template-columns: 1fr;
                     }
+                    .symptoms-pro-grid {
+                        grid-template-columns: 1fr 1fr;
+                    }
+                }
+                @media (max-width: 600px) {
+                    .input-sub-grid {
+                        grid-template-columns: 1fr;
+                    }
+                    .toggle-btn {
+                        padding: 8px 16px;
+                    }
+                }
+                @media (max-width: 480px) {
+                    .symptoms-pro-grid {
+                        grid-template-columns: 1fr;
+                    }
+                    .btn-primary {
+                        width: 100%;
+                    }
+                }
+                @media (max-width: 480px) {
                     .input-sub-grid {
                         grid-template-columns: 1fr;
                     }
@@ -255,6 +331,70 @@ const InputData = () => {
                             </div>
                         </div>
 
+                        {/* Activity Level */}
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '0.8rem', fontWeight: 500 }}>Activity Level</label>
+                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                <SimpleOption label="Sedentary" icon="🪑" isSelected={formData.daily_steps !== '' && formData.daily_steps < 3000} onClick={() => handleNormalInput('activity', 'low')} />
+                                <SimpleOption label="Active" icon="🚶" isSelected={formData.daily_steps >= 3000 && formData.daily_steps < 8000} onClick={() => handleNormalInput('activity', 'medium')} />
+                                <SimpleOption label="Very Active" icon="🏃" isSelected={formData.daily_steps >= 8000} onClick={() => handleNormalInput('activity', 'high')} />
+                            </div>
+                        </div>
+
+                        {/* Heart Rate / Physical Feeling */}
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '0.8rem', fontWeight: 500 }}>Physical Vitals</label>
+                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                <SimpleOption label="Calm" icon="🧘" isSelected={formData.avg_resting_heart_rate !== '' && formData.avg_resting_heart_rate <= 65} onClick={() => handleNormalInput('heart', 'calm')} />
+                                <SimpleOption label="Normal" icon="✅" isSelected={formData.avg_resting_heart_rate > 65 && formData.avg_resting_heart_rate <= 80} onClick={() => handleNormalInput('heart', 'normal')} />
+                                <SimpleOption label="Racing" icon="💓" isSelected={formData.avg_resting_heart_rate > 80} onClick={() => handleNormalInput('heart', 'fast')} />
+                            </div>
+                        </div>
+
+                        {/* Period Check */}
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '0.8rem', fontWeight: 500 }}>Period Tracking</label>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                                <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', margin: 0 }}>Did your period start recently?</p>
+                                <input
+                                    type="date"
+                                    name="last_period_date"
+                                    value={formData.last_period_date}
+                                    onChange={handleChange}
+                                    style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border)' }}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Cycle Signs & Tests */}
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '1rem', fontWeight: 600, color: 'var(--secondary)' }}>Optional: Body & Cycle Signals</label>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                                <div>
+                                    <p style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}>Any peak fertility signs or (+) test?</p>
+                                    <div style={{ display: 'flex', gap: '0.8rem' }}>
+                                        <button type="button" onClick={() => handleNormalInput('hormone_test', 'pos')} style={{ padding: '6px 12px', borderRadius: '8px', border: formData.lh >= 20 ? 'none' : '1px solid var(--border)', background: formData.lh >= 20 ? 'var(--secondary)' : 'transparent', color: formData.lh >= 20 ? 'white' : 'inherit', fontSize: '0.85rem' }}>Yes, peak</button>
+                                        <button type="button" onClick={() => handleNormalInput('hormone_test', 'neg')} style={{ padding: '6px 12px', borderRadius: '8px', border: formData.lh > 0 && formData.lh < 10 ? 'none' : '1px solid var(--border)', background: (formData.lh > 0 && formData.lh < 10) ? 'var(--text-secondary)' : 'transparent', color: (formData.lh > 0 && formData.lh < 10) ? 'white' : 'inherit', fontSize: '0.85rem' }}>No / Not sure</button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}>Body feeling a bit warmer than usual?</p>
+                                    <div style={{ display: 'flex', gap: '0.8rem' }}>
+                                        <button type="button" onClick={() => handleNormalInput('temp', 'high')} style={{ padding: '6px 12px', borderRadius: '8px', border: formData.pdg >= 10 ? 'none' : '1px solid var(--border)', background: formData.pdg >= 10 ? 'var(--primary)' : 'transparent', color: formData.pdg >= 10 ? 'white' : 'inherit', fontSize: '0.85rem' }}>Yes, warmer</button>
+                                        <button type="button" onClick={() => handleNormalInput('temp', 'normal')} style={{ padding: '6px 12px', borderRadius: '8px', border: (formData.pdg > 0 && formData.pdg < 5) ? 'none' : '1px solid var(--border)', background: (formData.pdg > 0 && formData.pdg < 5) ? 'var(--text-secondary)' : 'transparent', color: (formData.pdg > 0 && formData.pdg < 5) ? 'white' : 'inherit', fontSize: '0.85rem' }}>Normal</button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}>Notice any stretchy/clear fluid today?</p>
+                                    <div style={{ display: 'flex', gap: '0.8rem' }}>
+                                        <button type="button" onClick={() => handleNormalInput('fluid', 'fertile')} style={{ padding: '6px 12px', borderRadius: '8px', border: formData.estrogen >= 200 ? 'none' : '1px solid var(--border)', background: formData.estrogen >= 200 ? 'var(--secondary)' : 'transparent', color: formData.estrogen >= 200 ? 'white' : 'inherit', fontSize: '0.85rem' }}>Yes, stretchy</button>
+                                        <button type="button" onClick={() => handleNormalInput('fluid', 'dry')} style={{ padding: '6px 12px', borderRadius: '8px', border: (formData.estrogen > 0 && formData.estrogen < 100) ? 'none' : '1px solid var(--border)', background: (formData.estrogen > 0 && formData.estrogen < 100) ? 'var(--text-secondary)' : 'transparent', color: (formData.estrogen > 0 && formData.estrogen < 100) ? 'white' : 'inherit', fontSize: '0.85rem' }}>Dry / None</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
                         {/* Daily Note Input (Added for both modes) */}
                         <div>
                             <label style={{ display: 'block', marginBottom: '0.8rem', fontWeight: 500 }}>Anything else on your mind?</label>
@@ -281,6 +421,11 @@ const InputData = () => {
                                     style={{ padding: '8px 16px', borderRadius: '20px', border: formData.bloating > 0 ? 'none' : '1px solid var(--border)', background: formData.bloating > 0 ? 'var(--secondary)' : 'transparent', color: formData.bloating > 0 ? 'white' : 'var(--text-main)' }}>
                                     Bloating
                                 </button>
+                                <button type="button"
+                                    onClick={() => setFormData(p => ({ ...p, fatigue: p.fatigue === 0 ? 2 : 0 }))}
+                                    style={{ padding: '8px 16px', borderRadius: '20px', border: formData.fatigue > 0 ? 'none' : '1px solid var(--border)', background: formData.fatigue > 0 ? 'var(--secondary)' : 'transparent', color: formData.fatigue > 0 ? 'white' : 'var(--text-main)' }}>
+                                    Fatigue
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -304,45 +449,45 @@ const InputData = () => {
                             </div>
 
                             <div className="input-sub-grid">
-                                <div>
-                                    <label style={{ fontSize: '0.85rem' }}>{t('lh_level')} (mIU/mL)</label>
-                                    <input type="number" step="0.1" name="lh" value={formData.lh} onChange={handleChange} placeholder="e.g. 5.0 - 20.0" style={{ width: '100%' }} />
-                                    <small style={{ opacity: 0.6, fontSize: '0.7rem' }}>{t('normal')}: 1.9 - 14.6</small>
+                                <div className="pro-input-group">
+                                    <label>{t('lh_level')} (mIU/mL)</label>
+                                    <input type="number" step="0.1" name="lh" value={formData.lh} onChange={handleChange} placeholder="e.g. 5.0 - 20.0" />
+                                    <small>{t('normal')}: 1.9 - 14.6</small>
                                 </div>
-                                <div>
-                                    <label style={{ fontSize: '0.85rem' }}>{t('estrogen')} (pg/mL)</label>
-                                    <input type="number" step="0.1" name="estrogen" value={formData.estrogen} onChange={handleChange} placeholder="e.g. 100 - 400" style={{ width: '100%' }} />
-                                    <small style={{ opacity: 0.6, fontSize: '0.7rem' }}>{t('normal')}: 30 - 400</small>
+                                <div className="pro-input-group">
+                                    <label>{t('estrogen')} (pg/mL)</label>
+                                    <input type="number" step="0.1" name="estrogen" value={formData.estrogen} onChange={handleChange} placeholder="e.g. 100 - 400" />
+                                    <small>{t('normal')}: 30 - 400</small>
                                 </div>
-                                <div>
-                                    <label style={{ fontSize: '0.85rem' }}>{t('pdg')} (ug/mL)</label>
-                                    <input type="number" step="0.1" name="pdg" value={formData.pdg} onChange={handleChange} placeholder="e.g. 5.0 - 25.0" style={{ width: '100%' }} />
-                                    <small style={{ opacity: 0.6, fontSize: '0.7rem' }}>{t('progesterone_metabolite')}</small>
+                                <div className="pro-input-group">
+                                    <label>{t('pdg')} (ug/mL)</label>
+                                    <input type="number" step="0.1" name="pdg" value={formData.pdg} onChange={handleChange} placeholder="e.g. 5.0 - 25.0" />
+                                    <small>{t('progesterone_metabolite')}</small>
                                 </div>
-                                <div>
-                                    <label style={{ fontSize: '0.85rem' }}>{t('sleep_score')} (0-100)</label>
-                                    <input type="number" name="overall_score" value={formData.overall_score} onChange={handleChange} placeholder="e.g. 85" style={{ width: '100%' }} />
-                                    <small style={{ opacity: 0.6, fontSize: '0.7rem' }}>{t('from_smart_watch')}</small>
+                                <div className="pro-input-group">
+                                    <label>{t('sleep_score')} (0-100)</label>
+                                    <input type="number" name="overall_score" value={formData.overall_score} onChange={handleChange} placeholder="e.g. 85" />
+                                    <small>{t('from_smart_watch')}</small>
                                 </div>
-                                <div>
-                                    <label style={{ fontSize: '0.85rem' }}>{t('deep_sleep')} (Mins)</label>
-                                    <input type="number" name="deep_sleep_in_minutes" value={formData.deep_sleep_in_minutes} onChange={handleChange} placeholder="e.g. 90" style={{ width: '100%' }} />
-                                    <small style={{ opacity: 0.6, fontSize: '0.7rem' }}>{t('suggested')}: 60 - 120</small>
+                                <div className="pro-input-group">
+                                    <label>{t('deep_sleep')} (Mins)</label>
+                                    <input type="number" name="deep_sleep_in_minutes" value={formData.deep_sleep_in_minutes} onChange={handleChange} placeholder="e.g. 90" />
+                                    <small>{t('suggested')}: 60 - 120</small>
                                 </div>
-                                <div>
-                                    <label style={{ fontSize: '0.85rem' }}>{t('heart_rate')} (Avg BPM)</label>
-                                    <input type="number" name="avg_resting_heart_rate" value={formData.avg_resting_heart_rate} onChange={handleChange} placeholder="e.g. 72" style={{ width: '100%' }} />
-                                    <small style={{ opacity: 0.6, fontSize: '0.7rem' }}>{t('normal')}: 60 - 100</small>
+                                <div className="pro-input-group">
+                                    <label>{t('heart_rate')} (Avg BPM)</label>
+                                    <input type="number" name="avg_resting_heart_rate" value={formData.avg_resting_heart_rate} onChange={handleChange} placeholder="e.g. 72" />
+                                    <small>{t('normal')}: 60 - 100</small>
                                 </div>
-                                <div>
-                                    <label style={{ fontSize: '0.85rem' }}>{t('stress_score')} (0-100)</label>
-                                    <input type="number" name="stress_score" value={formData.stress_score} onChange={handleChange} placeholder="e.g. 20" style={{ width: '100%' }} />
-                                    <small style={{ opacity: 0.6, fontSize: '0.7rem' }}>{t('lower_is_better')}</small>
+                                <div className="pro-input-group">
+                                    <label>{t('stress_score')} (0-100)</label>
+                                    <input type="number" name="stress_score" value={formData.stress_score} onChange={handleChange} placeholder="e.g. 20" />
+                                    <small>{t('lower_is_better')}</small>
                                 </div>
-                                <div>
-                                    <label style={{ fontSize: '0.85rem' }}>{t('daily_steps')}</label>
-                                    <input type="number" name="daily_steps" value={formData.daily_steps} onChange={handleChange} placeholder="e.g. 8000" style={{ width: '100%' }} />
-                                    <small style={{ opacity: 0.6, fontSize: '0.7rem' }}>{t('recommended')}: 7000+</small>
+                                <div className="pro-input-group">
+                                    <label>{t('daily_steps')}</label>
+                                    <input type="number" name="daily_steps" value={formData.daily_steps} onChange={handleChange} placeholder="e.g. 8000" />
+                                    <small>{t('recommended')}: 7000+</small>
                                 </div>
 
                                 {/* Daily Note Input for Professional Mode */}
@@ -362,7 +507,7 @@ const InputData = () => {
                         <div>
                             <h3 style={{ marginBottom: '1.5rem', color: 'var(--secondary)' }}>{t('symptoms_scale')}</h3>
                             <p style={{ fontSize: '0.8rem', opacity: 0.7, marginBottom: '1rem' }}>{t('symptoms_legend')}</p>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.2rem' }}>
+                            <div className="symptoms-pro-grid">
                                 <div><label style={{ fontSize: '0.85rem' }}>{t('cramps')}</label><LikertScale name="cramps" current={formData.cramps} /></div>
                                 <div><label style={{ fontSize: '0.85rem' }}>{t('fatigue')}</label><LikertScale name="fatigue" current={formData.fatigue} /></div>
                                 <div><label style={{ fontSize: '0.85rem' }}>{t('mood_swings')}</label><LikertScale name="moodswing" current={formData.moodswing} /></div>

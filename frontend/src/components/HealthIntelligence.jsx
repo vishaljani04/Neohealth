@@ -35,8 +35,10 @@ export const predictNextPeriod = (records, currentPhase) => {
         .filter((v, i, a) => a.indexOf(v) === i)
         .sort() : [];
 
-    // Fallback if no records
-    const lastPeriod = periodDates.length > 0 ? periodDates[periodDates.length - 1] : new Date().toISOString().split('T')[0];
+    // 2. Identify Last Period (Fall back to first record if none explicitly marked)
+    const lastPeriod = periodDates.length > 0 ? periodDates[periodDates.length - 1] : (records && records.length > 0 ? records[0].date : null);
+    if (!lastPeriod) return null;
+    const isTentative = periodDates.length === 0;
 
     // Priority: Manual Setting > History Calc > Default 28
     let avgCycle = 28;
@@ -73,8 +75,10 @@ export const predictNextPeriod = (records, currentPhase) => {
     const nextDateStr = nextDateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
     // AI Explanation context
-    let explanation = `Based on ${isManual ? 'your manual' : 'avg'} ${avgCycle}-day cycle.`;
-    let confidence = "Medium";
+    let explanation = isTentative
+        ? "Tentative estimate based on first record. Log your last period for accuracy."
+        : `Based on ${isManual ? 'your manual' : 'avg'} ${avgCycle}-day cycle.`;
+    let confidence = isTentative ? "Tentative" : "Medium";
 
     const p = currentPhase?.toLowerCase() || '';
     const lastRecord = records && records.length > 0 ? records[records.length - 1] : null;

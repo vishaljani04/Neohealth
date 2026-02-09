@@ -46,19 +46,23 @@ def add_record():
             pass
 
     # Handle Daily Note & Sentiment Analysis
+    cleaned_data['sentiment_score'] = 0.0 # Default
     if 'daily_note' in data and data['daily_note']:
         note = data['daily_note'].strip()
         cleaned_data['daily_note'] = note
         
-        # Simple Sentiment Analysis using TextBlob
-        try:
-            from textblob import TextBlob
-            blob = TextBlob(note)
-            # Polarity is float [-1.0, 1.0] where -1 is negative and 1 is positive
-            cleaned_data['sentiment_score'] = blob.sentiment.polarity
-        except Exception as e:
-            print(f"Sentiment Analysis Error: {e}")
-            cleaned_data['sentiment_score'] = 0.0 # Default neutral
+        # Simplified Sentiment (no external library dependency for now to ensure stability)
+        note_lower = note.lower()
+        pos_words = ['good', 'great', 'happy', 'excellent', 'amazing', 'fine', 'well', 'better']
+        neg_words = ['bad', 'sad', 'stressed', 'tired', 'pain', 'cramps', 'awful', 'terrible']
+        
+        score = 0.0
+        for w in pos_words:
+            if w in note_lower: score += 0.25
+        for w in neg_words:
+            if w in note_lower: score -= 0.25
+        
+        cleaned_data['sentiment_score'] = max(-1.0, min(1.0, score))
             
     # Check if record for this date already exists
     record = HealthRecord.query.filter_by(user_id=user_id, date=record_date).first()
@@ -73,11 +77,16 @@ def add_record():
         
     try:
         db.session.commit()
-        return jsonify({"msg": "Record saved", "id": record.id}), 201
+        return jsonify({"msg": "Record saved successfully", "id": record.id}), 201
     except Exception as e:
         db.session.rollback()
-        print(f"DEBUG: Health Record Error: {str(e)}")
-        return jsonify({"msg": "Database error", "error": str(e)}), 500
+        error_str = str(e)
+        print(f"DEBUG: Health Record Error: {error_str}")
+        return jsonify({
+            "msg": "Failed to save health record to database",
+            "error": error_str,
+            "details": "Check if database columns (daily_note, sentiment_score) exist."
+        }), 500
 
 @bp.route('/record/<int:id>', methods=['PUT'])
 @jwt_required()
@@ -141,6 +150,11 @@ def get_records():
                 df = pd.read_csv(processed_path).fillna(0).head(15) # Take 15 rows for sample and fill NaNs
                 sample_data = []
                 for i, row in df.iterrows():
+                    # Every 28 days, simulate a period start in sample data
+                    last_p = None
+                    if i % 28 == 0:
+                        last_p = row.get('date', f"2023-01-{i+1:02d}")
+                    
                     sample_data.append({
                         "id": f"sample-{i}",
                         "date": row.get('date', f"2023-01-{i+1:02d}"),
@@ -158,6 +172,7 @@ def get_records():
                         "avg_resting_heart_rate": float(row.get('avg_resting_heart_rate', 0)),
                         "stress_score": float(row.get('stress_score', 0)),
                         "daily_steps": float(row.get('daily_steps', 0)),
+                        "last_period_date": last_p,
                         "is_example": True
                     })
                 return jsonify(sample_data)
