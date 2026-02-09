@@ -18,6 +18,10 @@ def create_app(config_class=Config):
     ma.init_app(app)
     CORS(app)
 
+    @app.route('/')
+    def home():
+        return "NeoHealth Backend is Live! 🚀"
+
     with app.app_context():
         from .routes import auth, health, predictions, admin, datasets
         app.register_blueprint(auth.bp, url_prefix='/api/auth')
