@@ -10,13 +10,13 @@
 ## 📖 Abstract
 In many healthcare systems, monitoring reproductive and hormonal health can be fragmented and data-heavy. NeoHealth addresses this by providing a unified, AI-enhanced interface that analyzes physiological trends such as Estrogen, LH (Luteinizing Hormone), PdG, and physical activities like heart rate and step counts. 
 
-The platform utilizes an **XGBoost-driven prediction engine** to forecast menstrual phases with high precision. Furthermore, it integrates a **Google Gemini-powered AI Assistant** that offers context-aware guidance in multiple languages (English, Hindi, and Gujarati). By merging predictive analytics with natural language processing, NeoHealth creates a proactive and accessible health monitoring ecosystem that prioritizes user privacy and data-driven wellness.
+The platform utilizes an **XGBoost-driven prediction engine** to forecast menstrual phases with high precision. Furthermore, it integrates a **Google Llama 3-powered AI Assistant** that offers context-aware guidance in multiple languages (English, Hindi, and Gujarati). By merging predictive analytics with natural language processing, NeoHealth creates a proactive and accessible health monitoring ecosystem that prioritizes user privacy and data-driven wellness.
 
 ---
 
 ## 🚀 All Features
 - **Smart Cycle Tracking**: Automatic prediction of menstrual phases using advanced ML models.
-- **Multilingual AI Health Assistant**: A context-aware chatbot (Gemini AI) that understands your health data and responds in English, Hindi, and Gujarati.
+- **Multilingual AI Health Assistant**: A context-aware chatbot (Llama 3 AI) that understands your health data and responds in English, Hindi, and Gujarati.
 - **Interactive Wellness Dashboard**: A premium, high-gloss interface featuring real-time health analytics via Recharts.
 - **Trend Analysis & Visualization**: Long-term tracking and graphical representation of Estrogen, LH, PdG, Heart Rate, and Step Count.
 - **Global Accessibility (i18n)**: Instant language switching across the entire UI for a localized experience.
@@ -38,7 +38,7 @@ The platform utilizes an **XGBoost-driven prediction engine** to forecast menstr
 
 ### Backend
 - **Framework**: Python + Flask
-- **AI Engine**: Google Gemini API
+- **AI Engine**: Google Llama 3 API
 - **ML Models**: XGBoost, Scikit-Learn, Pandas
 - **Database**: PostgreSQL / SQLAlchemy
 - **Authentication**: Flask-JWT-Extended
@@ -69,7 +69,7 @@ Navigate to the `backend` folder and set up your `.env` file:
 ```bash
 cd backend
 cp .env.example .env
-# Open .env and add your GEMINI_API_KEY and DATABASE_URL
+# Open .env and add your Llama 3_API_KEY and DATABASE_URL
 ```
 
 ### 4. Run the Application
