@@ -72,14 +72,65 @@ const InputData = () => {
     );
 
     return (
-        <div style={{ padding: '0 2rem 4rem' }}>
+        <div className="input-page-container" style={{ padding: '0 2rem 4rem' }}>
+            <style>{`
+                .input-main-grid {
+                    display: grid;
+                    grid-template-columns: minmax(300px, 1.2fr) 1fr;
+                    gap: 2rem;
+                }
+                .input-sub-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 1.2rem;
+                }
+                @media (max-width: 768px) {
+                    .input-page-container {
+                        padding: 0 1rem 4rem !important;
+                    }
+                    .input-main-grid {
+                        grid-template-columns: 1fr;
+                    }
+                    .input-sub-grid {
+                        grid-template-columns: 1fr;
+                    }
+                }
+            `}</style>
+
+            {/* Disclaimer Banner */}
+            <div style={{
+                background: '#fff7ed',
+                borderLeft: '4px solid #f97316',
+                padding: '1rem',
+                marginBottom: '2rem',
+                borderRadius: '8px',
+                display: 'flex',
+                alignItems: 'start',
+                gap: '0.8rem'
+            }}>
+                <div style={{ color: '#ea580c', marginTop: '2px' }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                </div>
+                <div>
+                    <h4 style={{ margin: '0 0 0.2rem 0', color: '#9a3412', fontSize: '1rem' }}>Demo Data Disclaimer</h4>
+                    <p style={{ margin: 0, color: '#c2410c', fontSize: '0.9rem', lineHeight: '1.4' }}>
+                        This is a demonstration environment. The data entered here is temporary and for testing purposes only.
+                        Please feel free to use example values (e.g., LH: 10.5, Sleep: 85) to test the AI predictions.
+                    </p>
+                </div>
+            </div>
+
             <h2 className="title-gradient" style={{ marginBottom: '2rem' }}>{t('log_daily_health')}</h2>
 
             <form onSubmit={handleSubmit} className="card" style={{ maxWidth: '1000px', margin: '0 auto' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1.2fr) 1fr', gap: '2rem' }}>
+                <div className="input-main-grid">
                     <div>
                         <h3 style={{ marginBottom: '1.5rem', color: 'var(--primary)' }}>{t('hormones_vitals')}</h3>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+                        <div className="input-sub-grid" style={{ marginBottom: '1.5rem' }}>
                             <div>
                                 <label style={{ fontSize: '0.85rem' }}>{t('entry_date')}</label>
                                 <input type="date" name="date" value={formData.date} onChange={handleChange} style={{ width: '100%' }} required />
@@ -90,7 +141,7 @@ const InputData = () => {
                             </div>
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.2rem' }}>
+                        <div className="input-sub-grid">
                             <div>
                                 <label style={{ fontSize: '0.85rem' }}>{t('lh_level')} (mIU/mL)</label>
                                 <input type="number" step="0.1" name="lh" value={formData.lh} onChange={handleChange} placeholder="e.g. 5.0 - 20.0" style={{ width: '100%' }} />

@@ -53,7 +53,7 @@ const Chatbot = ({ healthContext }) => {
     };
 
     return (
-        <div style={{ position: 'fixed', bottom: '2rem', right: '2rem', zIndex: 1000, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+        <div className="chatbot-container" style={{ position: 'fixed', bottom: '2rem', right: '2rem', zIndex: 1000, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
 
             <AnimatePresence>
                 {isOpen && (
@@ -62,7 +62,7 @@ const Chatbot = ({ healthContext }) => {
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.8, y: 20 }}
                         transition={{ duration: 0.2 }}
-                        className="card glass"
+                        className="card glass chatbot-window"
                         style={{
                             width: isExpanded ? '500px' : '380px',
                             height: isExpanded ? '700px' : '550px',
@@ -198,6 +198,21 @@ const Chatbot = ({ healthContext }) => {
                 @keyframes typing {
                     0%, 80%, 100% { transform: scale(0); }
                     40% { transform: scale(1); }
+                }
+                
+                @media (max-width: 480px) {
+                    .chatbot-container {
+                        right: 1rem !important;
+                        bottom: 1.5rem !important;
+                    }
+                    .chatbot-window {
+                        width: calc(100vw - 2rem) !important;
+                        height: 70vh !important;
+                        position: fixed !important;
+                        bottom: 6rem !important;
+                        right: 1rem !important;
+                        margin-bottom: 0 !important;
+                    }
                 }
             `}</style>
         </div>
