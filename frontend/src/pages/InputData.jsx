@@ -7,6 +7,10 @@ import { useTranslation } from 'react-i18next';
 
 const InputData = () => {
     const { t } = useTranslation();
+    const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
+    const [userMode, setUserMode] = useState('normal'); // 'normal' or 'professional'
+
     const [formData, setFormData] = useState({
         date: new Date().toISOString().split('T')[0],
         last_period_date: '',
@@ -14,12 +18,9 @@ const InputData = () => {
         cramps: 0, fatigue: 0, moodswing: 0,
         stress: 0, bloating: 0, sleepissue: 0,
         overall_score: '', deep_sleep_in_minutes: '',
-        avg_resting_heart_rate: '', stress_score: '', daily_steps: ''
+        avg_resting_heart_rate: '', stress_score: '', daily_steps: '',
+        daily_note: ''
     });
-    const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
-
-    const [userMode, setUserMode] = useState('normal'); // 'normal' or 'professional'
 
     React.useEffect(() => {
         document.title = 'Update Data | NeoHealth';
@@ -38,17 +39,14 @@ const InputData = () => {
     const handleNormalInput = (category, value) => {
         // Map simple inputs to complex data structure
         if (category === 'mood') {
-            // value: 'happy' (0), 'neutral' (1), 'sad' (2), 'anxious' (3)
             const map = { 'happy': 0, 'neutral': 1, 'sad': 2, 'anxious': 3 };
             setFormData(prev => ({ ...prev, moodswing: map[value] || 0 }));
         }
         if (category === 'energy') {
-            // value: 'high' (fatigue=0), 'medium' (fatigue=1), 'low' (fatigue=3)
             const map = { 'high': 0, 'medium': 1, 'low': 3 };
             setFormData(prev => ({ ...prev, fatigue: map[value] || 0 }));
         }
         if (category === 'sleep') {
-            // value: 'great' (score=90, deep=90, issues=0), 'good' (score=75, deep=60, issues=1), 'bad' (score=50, deep=30, issues=3)
             const map = {
                 'great': { overall_score: 90, deep_sleep_in_minutes: 90, sleepissue: 0 },
                 'good': { overall_score: 75, deep_sleep_in_minutes: 60, sleepissue: 1 },
@@ -58,7 +56,6 @@ const InputData = () => {
             setFormData(prev => ({ ...prev, ...scores }));
         }
         if (category === 'stress') {
-            // value: 'calm' (score=15, stress=0), 'busy' (score=40, stress=1), 'stressed' (score=75, stress=3)
             const map = {
                 'calm': { stress_score: 15, stress: 0 },
                 'busy': { stress_score: 40, stress: 1 },
@@ -74,14 +71,24 @@ const InputData = () => {
         setLoading(true);
         try {
             // 1. Submit Record
-            await healthService.addRecord(formData);
-            // 2. Run Prediction
-            await predictionService.predict({ date: formData.date });
+            const res = await healthService.addRecord(formData);
+
+            // 2. Run Prediction (Only if save succeeded)
+            if (res.status === 201 || res.status === 200) {
+                await predictionService.predict({ date: formData.date });
+            }
             navigate('/');
         } catch (err) {
-            console.error(err);
-            const errorMsg = err.response?.data?.msg || err.response?.data?.error || t('error_saving_data');
-            alert(errorMsg);
+            console.error("Save Error:", err);
+            const backendMsg = err.response?.data?.msg;
+            const backendError = err.response?.data?.error;
+
+            let displayMsg = t('error_saving_data');
+            if (backendMsg) {
+                displayMsg = backendMsg + (backendError ? `\n\nDetails: ${backendError}` : '');
+            }
+
+            alert(displayMsg);
         } finally {
             setLoading(false);
         }
