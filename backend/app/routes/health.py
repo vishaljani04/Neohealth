@@ -44,6 +44,21 @@ def add_record():
             cleaned_data['last_period_date'] = datetime.strptime(data['last_period_date'], '%Y-%m-%d').date()
         except:
             pass
+
+    # Handle Daily Note & Sentiment Analysis
+    if 'daily_note' in data and data['daily_note']:
+        note = data['daily_note'].strip()
+        cleaned_data['daily_note'] = note
+        
+        # Simple Sentiment Analysis using TextBlob
+        try:
+            from textblob import TextBlob
+            blob = TextBlob(note)
+            # Polarity is float [-1.0, 1.0] where -1 is negative and 1 is positive
+            cleaned_data['sentiment_score'] = blob.sentiment.polarity
+        except Exception as e:
+            print(f"Sentiment Analysis Error: {e}")
+            cleaned_data['sentiment_score'] = 0.0 # Default neutral
             
     # Check if record for this date already exists
     record = HealthRecord.query.filter_by(user_id=user_id, date=record_date).first()

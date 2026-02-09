@@ -248,6 +248,18 @@ const InputData = () => {
                             </div>
                         </div>
 
+                        {/* Daily Note Input (Added for both modes) */}
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '0.8rem', fontWeight: 500 }}>Anything else on your mind?</label>
+                            <textarea
+                                name="daily_note"
+                                value={formData.daily_note || ''}
+                                onChange={handleChange}
+                                placeholder="e.g. Had a really stressful meeting today, but a nice walk helped."
+                                style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', minHeight: '100px', fontFamily: 'inherit' }}
+                            />
+                        </div>
+
                         {/* Symptoms Checklist */}
                         <div>
                             <label style={{ display: 'block', marginBottom: '0.8rem', fontWeight: 500 }}>Physical Symptoms</label>
@@ -324,6 +336,18 @@ const InputData = () => {
                                     <label style={{ fontSize: '0.85rem' }}>{t('daily_steps')}</label>
                                     <input type="number" name="daily_steps" value={formData.daily_steps} onChange={handleChange} placeholder="e.g. 8000" style={{ width: '100%' }} />
                                     <small style={{ opacity: 0.6, fontSize: '0.7rem' }}>{t('recommended')}: 7000+</small>
+                                </div>
+
+                                {/* Daily Note Input for Professional Mode */}
+                                <div style={{ gridColumn: 'span 2' }}>
+                                    <label style={{ fontSize: '0.85rem' }}>Additional Notes / Journal</label>
+                                    <textarea
+                                        name="daily_note"
+                                        value={formData.daily_note || ''}
+                                        onChange={handleChange}
+                                        placeholder="Any specific symptoms or feelings today?"
+                                        style={{ width: '100%', padding: '10px 16px', borderRadius: '12px', border: '1px solid var(--border)', minHeight: '80px', fontFamily: 'inherit' }}
+                                    />
                                 </div>
                             </div>
                         </div>

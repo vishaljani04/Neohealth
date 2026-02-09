@@ -46,6 +46,8 @@ class HealthRecord(db.Model):
     stress_score = db.Column(db.Float)
     daily_steps = db.Column(db.Float)
     last_period_date = db.Column(db.Date) # Added this field
+    daily_note = db.Column(db.Text) # New field for user notes
+    sentiment_score = db.Column(db.Float) # New field for sentiment analysis result
     
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
