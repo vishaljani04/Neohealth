@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
 import InputData from './pages/InputData';
 import { authService } from './services/api';
 
@@ -51,6 +52,7 @@ function App() {
           <Routes>
             <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
             <Route path="/register" element={!user ? <Register /> : <Navigate to="/" />} />
+            <Route path="/forgot-password" element={!user ? <ForgotPassword /> : <Navigate to="/" />} />
             {/* If user is not logged in, redirect to Login. This happens automatically after Splash via Navigate */}
             <Route path="/" element={user ? <Dashboard key={refreshTrigger} onDataUpdate={handleDataUpdate} /> : <Navigate to="/login" />} />
             <Route path="/input" element={user ? <InputData /> : <Navigate to="/login" />} />

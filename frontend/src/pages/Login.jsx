@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/api';
-import { ArrowRight, Smartphone, Lock, Loader2, ArrowLeft, HeartPulse } from 'lucide-react';
+import { ArrowRight, Smartphone, Lock, Loader2, ArrowLeft, HeartPulse, Eye, EyeOff } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Login = () => {
@@ -9,6 +10,7 @@ const Login = () => {
     const [formData, setFormData] = useState({ mobile: '', password: '' });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
 
     React.useEffect(() => {
@@ -169,14 +171,36 @@ const Login = () => {
                                 <div style={{ position: 'relative' }}>
                                     <Lock size={20} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                                     <input
-                                        type="password"
+                                        type={showPassword ? "text" : "password"}
                                         value={formData.password}
                                         onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                                         placeholder="Enter your password"
-                                        style={{ width: '100%', padding: '12px 12px 12px 40px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '1rem', outline: 'none' }}
+                                        style={{ width: '100%', padding: '12px 40px 12px 40px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '1rem', outline: 'none' }}
                                         required
                                         autoFocus
                                     />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        style={{
+                                            position: 'absolute',
+                                            right: '12px',
+                                            top: '50%',
+                                            transform: 'translateY(-50%)',
+                                            background: 'none',
+                                            border: 'none',
+                                            color: '#94a3b8',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            padding: '4px'
+                                        }}
+                                    >
+                                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                    </button>
+                                </div>
+                                <div style={{ textAlign: 'right', marginTop: '0.5rem' }}>
+                                    <Link to="/forgot-password" style={{ color: '#4f46e5', fontSize: '0.85rem', textDecoration: 'none' }}>Forgot Password?</Link>
                                 </div>
                             </div>
 

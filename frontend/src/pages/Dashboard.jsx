@@ -24,7 +24,6 @@ const Dashboard = ({ onDataUpdate }) => {
     const [records, setRecords] = useState([]);
     const [predictions, setPredictions] = useState([]);
     const [datasets, setDatasets] = useState([]);
-    const [globalSummary, setGlobalSummary] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -32,13 +31,11 @@ const Dashboard = ({ onDataUpdate }) => {
         Promise.all([
             healthService.getRecords(),
             predictionService.getHistory(),
-            datasetService.list(),
-            api.get('/datasets/summary').catch(() => ({ data: null }))
-        ]).then(([recRes, predRes, dataRes, globalRes]) => {
+            datasetService.list()
+        ]).then(([recRes, predRes, dataRes]) => {
             setRecords(recRes.data);
             setPredictions(predRes.data);
             setDatasets(dataRes.data);
-            setGlobalSummary(globalRes.data);
         }).finally(() => setLoading(false));
     }, []);
 
@@ -226,23 +223,6 @@ const Dashboard = ({ onDataUpdate }) => {
                     </div>
                 </div>
 
-                {/* Global Data Card */}
-                {globalSummary && (
-                    <div className="card community-insights-card">
-                        <div className="community-insights-header">
-                            <Brain size={16} /> {t('community_insights')}
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end' }}>
-                            <div>
-                                <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{(globalSummary.total_steps / 1000000).toFixed(1)}M</div>
-                                <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>{t('steps_tracked')}</div>
-                            </div>
-                            <div style={{ fontSize: '0.8rem', padding: '4px 8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px' }}>
-                                {t('records_count', { count: globalSummary.total_records.toLocaleString() })}
-                            </div>
-                        </div>
-                    </div>
-                )}
             </div>
 
             {/* AI Assistant */}

@@ -21,6 +21,7 @@ export const authService = {
   me: () => api.get('/auth/me'),
   checkMobile: (mobile) => api.post('/auth/check-mobile', { mobile }),
   updateProfile: (data) => api.put('/auth/profile', data),
+  resetPassword: (data) => api.post('/auth/reset-password', data),
 };
 
 export const healthService = {

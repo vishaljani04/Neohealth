@@ -97,3 +97,21 @@ def update_profile():
     db.session.commit()
     
     return jsonify({"msg": "Profile updated successfully", "user": {"id": user.id, "username": user.username, "email": user.email, "mobile": user.mobile}}), 200
+
+@bp.route('/reset-password', methods=['POST'])
+def reset_password():
+    data = request.get_json()
+    mobile = data.get('mobile')
+    new_password = data.get('password')
+    
+    if not mobile or not new_password:
+        return jsonify({"msg": "Mobile and password are required"}), 400
+        
+    user = User.query.filter_by(mobile=mobile).first()
+    if not user:
+        return jsonify({"msg": "User not found"}), 404
+        
+    user.set_password(new_password)
+    db.session.commit()
+    
+    return jsonify({"msg": "Password reset successfully"}), 200
